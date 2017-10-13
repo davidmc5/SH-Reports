@@ -20,9 +20,12 @@ import ast
 import copy
 import six
 
+import inspect
+
 # for all folder names and locations see shPaths
 from shPaths import *
 
+from itertools import islice
 
 #Slide layouts
 #0 Title Slide
@@ -44,7 +47,9 @@ def logEntry(*logData):
     
     tTime = time.strftime("%X")
     tDate = time.strftime("%x")
-    logFields = [tDate, tTime]
+    caller = inspect.stack()[1][1] # get the module that made this call
+    line = inspect.stack()[1][2] # get the line that made this call
+    logFields = [tDate, tTime, caller, line]
     for arg in logData:
         logFields.append(arg)
         
@@ -61,9 +66,11 @@ def logEntry(*logData):
                 logWriter = csv.writer(logFile)
                 logWriter.writerow(logFields)
         except:
-            print "BOTH LOG FILES ARE OPEN! UNABLE TO SAVE LOGs"
+            print "HELLO!!! BOTH LOG FILES ARE OPEN! UNABLE TO SAVE LOGs!"
 
-    for field in logFields:
+    # Print Log Message also to the Command Prompt Screen
+    print tDate, tTime, 
+    for field in logData:
         print field,
     print ''
 
@@ -72,14 +79,22 @@ def logEntry(*logData):
 
 def createCsvTempFolder():
     #Create a temp directory for csv zip and csv files
-    try:
-        os.makedirs(csvTempFolder)
-    except OSError as exception:
-        #a race condition occurred. 
-        if exception.errno != errno.EEXIST:
-            #a race condition might have occurred.
-            print 'Problem trying to create folder:', csvTempFolder
-            raise
+
+    while True:
+        try:
+            os.makedirs(csvTempFolder)
+            return
+        except OSError as exception:
+            #a race condition occurred. 
+            if exception.errno != errno.EEXIST:
+                #a race condition might have occurred.
+                #print 'Problem trying to create folder:', csvTempFolder
+                logEntry('Folder Creation Error', csvTempFolder)
+                time.sleep(10)
+                continue
+            else:
+                return
+
 
 
 def initFolders():
@@ -93,13 +108,18 @@ def initFolders():
     shutil.rmtree(csvTempFolder, ignore_errors=True)
 
     #delete any old zip files from collector folder
-    for item in os.listdir(collectorFolder):
-        if item.endswith(".zip"):
-            os.remove(join(collectorFolder, item))
+    try:
+        for item in os.listdir(collectorFolder):
+            if item.endswith(".zip"):
+                os.remove(join(collectorFolder, item))
+    except:
+        logEntry('File Move Error', collectorFolder, item, 'Waiting 30 sec')
+        #wait for the OS to close the files        
+        time.sleep(30)
 
 
 
-def archiveFiles(shFile, custData, arch_opt=None):
+def archiveFiles(shFile, custData, archv_opt=None):
     #Archive remote and local copies of sh zip files
 
     #retrieve SH report variables
@@ -111,28 +131,32 @@ def archiveFiles(shFile, custData, arch_opt=None):
     #if option 'no_remote' has been included, do not archive the remote file.
     
 
-    if arch_opt != 'no_remote':
-        #Verify it exists or create a directory to archive the remote SH Files
+    if archv_opt != 'no_remote':
+        #Verify if the remote archive directory already exists
+        #or create a new one to archive the processed remote SH Files
         #Use the year from the file name as the archive directory
         try:
             os.makedirs(folder + shYear)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
-                print 'problem trying to create folder', folder + shYear 
-                raise
+                #print 'problem trying to create folder', folder + shYear
+                logEntry('Folder Creation Error', folder + shYear)
+                
         #Move sh zip file to the archive (year) directory to avoid re-processing
         startFile = folder + shFile
         endFile = folder + shYear + '/' + shFile
         shutil.move(startFile, endFile)
     else:
+        #Option "no_remote" given:
         #delete remote SH file (Do not archive)
         startFile = folder + shFile
         try:
             os.remove(startFile)
         except:
-            #it does not seem this is necessary.
+            #This does not seem this is necessary.
             #The zip file gets deleted even if one of its sub-files is open
-            print tDate, tTime, 'Error: Can\'t delete Remote SH File'
+            #print tDate, tTime, 'Error: Can\'t delete Remote SH File'
+            logEntry('Folder Deletion Error', 'Can\'t delete Remote SH File', folder + shFile)
 
 
     #Local zip file
@@ -141,8 +165,9 @@ def archiveFiles(shFile, custData, arch_opt=None):
         os.makedirs(archiveFolder)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
-            print 'problem trying to create local archive folder', archiveFolder
-            raise
+            logEntry('Folder Creation Error', 'Can\'t create local archive folder', archiveFolder)
+            time.sleep(60)
+            #raise
     #Move sh zip file to the local archive directory 
     src = collectorFolder + shFile
     dst = archiveFolder + shFile
@@ -153,23 +178,38 @@ def archiveBad(customer, shFile):
     #Archive bad zip to 'SAN HEALTH/TEMP'
     #archive local copy to archive
 
-#   #remote folder
+    #remote folder
+    #drive and startFolder are defined in shPath.py
     folder = drive + startFolder + customer + shFolder
     
-    #Verify it exists or create a directory to archive the remote SH Files
-    #Use the year from the file name as the archive directory
+    #Verify it exists or create a directory to archive the remote bad SH Files
     try:
         os.makedirs(folder + 'TEMP')
     except OSError as exception:
         if exception.errno != errno.EEXIST:
-            print 'problem trying to create folder', folder + 'TEMP' 
-            raise
+            logEntry('Can\'t Create TEMP folder in ', folder)
         
-    #Move bad sh zip to SAN HEALTH/TEMP 
-    startFile = folder + shFile
-    endFile = folder + 'TEMP/' + shFile
-    shutil.move(startFile, endFile)
+        
+    #Move bad sh zip to SAN HEALTH/TEMP
+        try:            
+            startFile = folder + shFile
+            endFile = folder + 'TEMP/' + shFile
+            shutil.move(startFile, endFile)
+        except:
+            logEntry('File Move Error', startFile, 'Waiting 30 sec')
+            time.sleep(30)
+            #Problem moving remote bad file to archive'
+##            if startFile not in blacklist:
+##                blacklist.append(startFile)
+##                logEntry('Can\'t Move File', startFile)
+##                print blacklist
 
+#--------------------------------------------
+#--------------------------------------------
+    #print 'BAD FILE:', startFile
+
+#--------------------------------------------
+#--------------------------------------------
 
     #local zip file
     #Verify it exists or create a directory to archive the local copy of SH Files
@@ -177,12 +217,19 @@ def archiveBad(customer, shFile):
         os.makedirs(archiveFolder)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
-            print 'problem trying to create folder', archiveFolder
-            raise
+            #print 'Problem trying to create folder', archiveFolder
+            logEntry('Can\'t Create Archive folder', archiveFolder)
+            
+        
     #Move local sh zip file to the archive
-    src = collectorFolder + shFile
-    dst = archiveFolder + shFile
-    shutil.move(src, dst)
+    try:        
+        src = collectorFolder + shFile
+        dst = archiveFolder + shFile
+        shutil.move(src, dst)
+    except:
+        #print 'Problem moving local bad file to archive', src
+        logEntry('Can\'t Archive Bad Zip', src)
+        
     
 
 def getZipFiles(customer):
@@ -192,6 +239,7 @@ def getZipFiles(customer):
     
     #Customer's SH folder
     folder = drive + startFolder + customer + shFolder
+
 
     if not os.path.isdir(folder):
         #shFolder does not exist
@@ -226,24 +274,36 @@ def getZipFiles(customer):
             time.sleep(10) 
             lastCount = len(os.listdir(folder))
             #print lastCount,
+
             if lastCount != firstCount:
                 #the number of files is still incrementing
                 #Keep waiting
                 firstCount = lastCount
-            else:
+                logEntry('File Upload', 'Waiting for mutiple files being uploaded')                
+            else:                
                 #The number of files uploaded is stable. Retrieve them.
+                #print lastCount
                 break
 
 
         #there are some files...
         #download just the zip files (if any)
         files = os.listdir(folder)
+        #print files
         fileCount = 0 #counts how many zip files have been collected
+        
         for eachFile in files:
+            #print eachFile
+            
             extension = os.path.splitext(eachFile)[1]
             if (extension == '.zip'):
+
+                #----problem here
                 createCsvTempFolder()
+                #----problem here
+                
                 fileCount += 1
+                #print 'fileCount', fileCount
                 src = folder + eachFile
                 dst = collectorFolder + eachFile
                 
@@ -251,10 +311,14 @@ def getZipFiles(customer):
                 #that is not yet ready, and get it corrupt.
                 #find a better way of doing this.
                 #time.sleep(1)
-                
                 shutil.copyfile(src, dst)
+               
+            #print eachFile
     except:
-        print 'PROBLEM RETRIEVING ZIP FILES FROM!', folder
+    
+        #PROBLEM RETRIEVING ZIP FILES!
+        logEntry('File Error', 'Can\'t Retrieve Files From', folder)
+        
         #Probably the file is still being uploaded by user
         #skip until the next pass
         return None
@@ -293,11 +357,22 @@ def get_csvFileItems(csvZipFile):
     csvPath = csvTempFolder + shName + '_'
     return (csvPath, shName, sanName, shYear)
 
+
+
 def get_shFiles():
     #generator to get the names of ONLY files (not direstories)...
     #...in the collector folder
     files = ( shFile for shFile in os.listdir(collectorFolder) 
          if os.path.isfile(os.path.join(collectorFolder, shFile)) )
+    return files
+
+
+
+def get_csvFiles():
+    #generator to get the names of ONLY files (not direstories)...
+    #...in the csv collector folder
+    files = ( csvFile for csvFile in os.listdir(csvTempFolder) 
+         if os.path.isfile(os.path.join(csvTempFolder, csvFile)) )
     return files
     
 
@@ -345,9 +420,6 @@ def extract_csvFiles(shFile):
                         #now we have in the local collector folder all the individual csv files
                         return get_csvFileItems(compFile)
         except:
-            #print 'zip file appears to be corrupt'
-            #rename
-            #shFile = 'BAD_' + shFile
             return 'Bad'
             #raise
     else:
@@ -363,7 +435,9 @@ def col2num(col):
     return num
 
 
-
+#----------------------------------------
+# modifying this function to get ALL the csv files extracted to the csvTemp directory
+# and adding the SAN name
 
 def getCsvData(options):
     #getCsvData extracts the specified columns from the csv file
@@ -371,21 +445,70 @@ def getCsvData(options):
     #example: columns = ['a', 'c', 'd', 'l', 'm']
     #it returns a list of row-lists (one list per row) in that column order
 
-    csvFile = options.csvPath + options.csvFile + '.csv'
+
+    #csvFile = options.csvPath + options.csvFile + '.csv'
     columns = options.csvColumns
     shData = [] #initialise a list to store each row-list
-    
-    with open(csvFile, 'rb') as f:
-        reader = csv.reader(f)
 
-        for shRow in reader:
-            if len(shRow) == 0: break
-            row=[]
-            for col in columns:
-                row.append(shRow[col2num(col)-1])
-            #print row
-            shData.append(row)
+    # delete this
+    #csvFiles = get_csvFiles()
+
+    #print options.csvPathList
+   
+    csvTarget = options.csvFile + '.csv'
+
+    #print 'csvPath', options.csvPath
+    #print 'csvTarget', csvTarget
+
+
+    for csvPath in options.csvPathList:
+        csvFile = csvPath + csvTarget
+        #print csvFile
+        
+      
+        with open(csvFile, 'rb') as f:
+            reader = csv.reader(f)
+
+            for rowIdx, shRow in enumerate(reader):
+                #stop reading when we reach the end
+                if len(shRow) == 0: break
+
+                if rowIdx == 0:
+                    # don't import the header row
+                    #print shRow
+                    continue
+                
+                
+                #append each row data to a list
+                row=[]
+                #grab only the columns requested
+                for col in columns:
+                    row.append(shRow[col2num(col)-1]) #column index start at 1
+
+                shData.append(row)
     return shData
+
+##def getCsvData(options):
+##    #getCsvData extracts the specified columns from the csv file
+##    #the columns are a list of strings with the csv column letter identifier:
+##    #example: columns = ['a', 'c', 'd', 'l', 'm']
+##    #it returns a list of row-lists (one list per row) in that column order
+##
+##    csvFile = options.csvPath + options.csvFile + '.csv'
+##    columns = options.csvColumns
+##    shData = [] #initialise a list to store each row-list
+##    
+##    with open(csvFile, 'rb') as f:
+##        reader = csv.reader(f)
+##
+##        for shRow in reader:
+##            if len(shRow) == 0: break
+##            row=[]
+##            for col in columns:
+##                row.append(shRow[col2num(col)-1])
+##            #print row
+##            shData.append(row)
+##    return shData
 
 
 #================================================================
@@ -397,7 +520,7 @@ if __name__ == "__main__":
     while True:
         customer = 'Customer B'
         getZipFiles(customer)
-        #print '.',
+        print '.',
 
 
 

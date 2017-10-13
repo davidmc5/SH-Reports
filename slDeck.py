@@ -60,32 +60,23 @@ def formatDbUsed(data):
 ##    return newData
 
 
-def createSlideDeck(custData):
+def createSlideDeck(tbl_options):
     #This function creates a slide deck with the csv files extracted in the collector folder
     
     #-----------------------------------
     # TO DO
+
+    #1) MAKE A FUNCTION TO READ a slide definition config file
+    #AND GENERATE SLIDE DECK
+
+    #2) IF THERE IS NO DATA FOR A SLIDE, PRINT A NOTE ON THE SLIDE: NO DATA!
     #-----------------------------------
 
-    #MAKE A FUNCTION TO READ a slide definition config file AND GENERATE SLIDE DECK
 
-    #IF THERE IS NO DATA FOR A SLIDE, PRINT A NOTE ON THE SLIDE: NO DATA!
-                        
-    #-----------------------------------
-    timestamp = datetime.datetime.now().strftime("%y-%m-%d-%H%M")
-    #print 'custData', custData
-    
-    customer, csvPath, shName, sanName, shYear = custData
-
-##    tTime = time.strftime("%X")
-##    tDate = time.strftime("%x")
-##    print tDate, tTime, 'Slide Deck:', customer, '\\', shName
+    customer, csvPath, shName, sanName, shYear = tbl_options.custData
 
     #Open Slide Deck Template
     prs = Presentation(slides_template_path)
-
-    #initialize table's default options
-    tbl_options = Table_Options()
 
     #set desired table options
     tbl_options.csvPath = csvPath
@@ -182,6 +173,504 @@ def createSlideDeck(custData):
 #--------------------------------------------------------
     #SLIDES
 #--------------------------------------------------------
+#--------------------------------------------------------
+    ###SLIDE COPY
+    ##copy_slide(prs, prs, 0)
+
+#--------------------------------------------------------------------
+    ###SLIDE MOVE
+    ##move_slide(prs, 0, 1)
+
+#--------------------------------------------------------------------
+    #TITLE SLIDE
+
+    #grab first (title) slide (index=0)
+    slide1 = prs.slides[0]
+    shapes = slide1.shapes
+    
+    #add_textbox(left, top, width, height)
+    subtxt = shapes.add_textbox(Inches(2),Inches(4), Inches(10), Inches(1))
+    subtxt.text = 'SAN: ' + sanName
+    subtxt.text_frame.paragraphs[0].font.size = Pt(40)
+    subtxt.text_frame.paragraphs[0].font.color.rgb = RGBColor(255,255,255) # White?
+    
+#--------------------------------------------------------------------
+    ##SLIDE WITH JUST TEXT
+    
+    ##title_slide_layout = prs.slide_layouts[1]
+    ##slide = prs.slides.add_slide(title_slide_layout)
+    ##title = slide.shapes.title
+    ##subtitle = slide.placeholders[1]
+    ##title.text = "Hello, World!"
+    ##subtitle.text = "python-pptx was here!"
+#--------------------------------------------------------------------
+
+##    #SLIDE WITH ONE TABLE - FROM SINGLE CSV FILE
+##    tbl_options.title = 'Fabric Summary'
+##    tbl_options.subtitle = 'SAN: '+ sanName
+##    tbl_options.csvFile = 'FabricSummary'
+##    tbl_options.csvColumns = ['a', 'c', 'd', 'e', 'f', 'g', 'k', 'l', 'm']
+##    create_single_table(tbl_options)
+
+#--------------------------------------------------------------------
+
+    #SLIDE: FABRIC SUMMARY TABLE
+
+    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
+    #using two db tables from two csv files
+
+    tbl_options.title = 'Fabric Summary'
+    tbl_options.subtitle = 'SAN: '+ sanName
+
+
+    c.execute('''
+    SELECT
+        sw_fabric,
+        sw_model,
+        COUNT(s.sw_name) AS count,
+        SUM(ports.total_ports),
+        SUM(ports.unlic_ports),
+        SUM(ports.unused_ports),
+        SUM(ports.isl_ports),
+        SUM(ports.hosts),
+        SUM(ports.disks),
+        SUM(ports.total_devices)
+    FROM
+        switches s
+    INNER JOIN ports ON s.sw_name = ports.sw_name
+    GROUP BY
+        s.sw_fabric, s.sw_model
+    ORDER BY
+        s.sw_fabric, s.sw_model, count
+    ''')
+
+    data = c.fetchall()
+    #format data with group headers (remove the group = first column data)
+    data = groupHeader(data)
+
+    
+    #Add column headers to print on the slide table
+    # this is a tuple with the column names
+    # as the very first record of the 'data' list
+    headers = [('Switch Model',
+                'Total Switches',
+                'Total Ports',
+                'Unlicensed Ports',
+                'Unused Ports',
+                'ISL Ports',
+                'Hosts',
+                'Disks',
+                'Total Devices')]
+
+    headers.extend(data)
+    data = headers
+    create_single_table_db(data, tbl_options)
+
+
+#--------------------------------------------------------------------
+
+    #SLIDE: HANGING ZONES TABLE
+
+    tbl_options.title = 'Zoning Summary'
+    tbl_options.subtitle = 'SAN: '+ sanName
+
+    
+    c.execute('''
+    SELECT
+        sw_fabric,
+        active_zoneCfg,
+        hang_alias,
+        hang_zones,
+        hang_configs,
+        zone_dbUsed
+    FROM
+        zones
+    WHERE
+        zone_dbUsed != 'Unknown'
+     ORDER BY
+        sw_fabric
+   ''')
+    data = c.fetchall()
+    
+    #covert data on 'dbUsed' column from Bytes to MB
+    data = formatDbUsed(data)
+
+    #reformat dbUsed data
+    
+    #Add column headers to print on the slide table
+    # this is a tuple with the column names
+    # as the very first record of the 'data' list
+    headers = [('Fabric',
+                'Active Zone',
+                'Hanging Alias Mems',
+                'Hanging Zone Mems',
+                'Hanging Config Mems',
+                'Zone Database Use')]
+
+    headers.extend(data)
+    data = headers
+    create_single_table_db(data, tbl_options)
+
+#--------------------------------------------------------------------
+  
+    #SLIDE: SWITCH SUMMARY TABLE
+
+    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
+    #using two db tables from two csv files
+
+    tbl_options.title = 'Switch Summary'
+    tbl_options.subtitle = 'SAN: '+ sanName
+
+
+##    #Change all fru.fru_status column data to upper case
+##      # not needed. Case change done on sql with the UPPER()
+##    c.execute('''
+##    UPDATE frus
+##    SET fru_status = UPPER(fru_status)''')
+    
+    # If FRU Status is 'enabled' or 'ok', set to blank (OK)
+    c.execute('''
+    UPDATE frus
+    SET fru_status=''
+    WHERE UPPER(fru_status) = 'ENABLED' OR UPPER(fru_status) = 'OK' ''')
+    conn.commit()
+
+    
+#----------------------
+    #This query reports the total of unique combinations of
+    #fabric, switch model, firmware, switch status and number of defective FRUs
+    c.execute('''
+    SELECT
+        s.sw_fabric,
+        s.sw_model,
+        COUNT(*) AS cnt,
+        s.sw_firmware,
+        s.sw_status,
+        SUM(f.fru_cnt) as tot_fru
+        FROM switches s
+        LEFT JOIN (
+            SELECT sw_name, COUNT(*) AS fru_cnt
+            FROM frus
+            WHERE fru_status != ''
+            GROUP BY sw_name
+            ) f
+        ON f.sw_name = s.sw_name
+    GROUP BY
+        s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
+    ORDER BY
+        s.sw_fabric, s.sw_model, cnt
+    ''')
+#--------------------------------
+#--------------------------------
+
+##    # this prints db column headers for the query, if used right after a query
+##    for k in c.description:
+##        print(k[0])
+
+##    # format FRU status
+##    # no longer needed since the formating is done with an SQL UPDATE command
+##    #data = formatFruStatus(data)
+
+    #grab the results of the sql query
+    data = c.fetchall()
+    
+    #format data with group headers (remove the group = first column data)
+    data = groupHeader(data)
+
+    
+    #Add column headers to print on the slide table
+    # this is a tuple with the column names
+    # as the very first record of the 'data' list
+    # first column for 'fabric' will be printed on a single dividing row
+    
+    headers = [('Switch Model',
+                'Total Switches',
+                'Firmware',
+                'Switch Status',
+                'Faulty FRUs')]
+
+    headers.extend(data)
+    data = headers
+    create_single_table_db(data, tbl_options)
+   
+
+
+
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+    # END OF SLIDES
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+    #close the connection to the database file
+    conn.close()
+
+    #save the slide deck to the customer's SH directory
+    #using the current san health file name
+    folder = drive + startFolder + customer + shFolder
+    try:
+        prs.save(folder + shName + '.pptx')
+    except:
+        #if slide deck with the same name is open...
+        #... store a new one renamed with a timestamp 
+        print folder + shName, 'Kept Open'
+        prs.save(folder + shName + '-'+ timestamp + '.pptx')
+
+    #save a local copy of the slide deck
+    folder = archiveFolder
+    try:
+        prs.save(folder + shName + '.pptx')
+    except:
+        #if slide deck with the same name is open...
+        #... store a new one renamed with a timestamp 
+        print folder + shName, 'Kept Open'
+        prs.save(folder + shName + '-'+ timestamp + '.pptx')
+        
+
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+def loadDbTables(tbl_options):
+    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+
+
+    #set desired table options
+    #Is this needed? csvPathList is storing those now.
+    tbl_options.csvPath = csvPath
+
+    # Connect to the database file
+    conn = sql.connect(sqlite_file)
+    tbl_options.dbConnection = conn
+    c = conn.cursor()
+
+#---------------------------------
+
+##Import into dbtable: SwitchSummary.csv
+    tbl_options.csvFile = 'SwitchSummary'
+    tbl_options.csvColumns = ['a', 'k', 'c', 'f', 'i', 's', 't']
+
+    tbl_options.dbTableName = 'switches'
+    tbl_options.dbColNames = '''
+    sw_name TEXT PRIMARY KEY,
+    sw_sn TEXT,
+    sw_model TEXT,
+    sw_firmware TEXT,
+    sw_fabric TEXT,
+    sw_state TEXT,
+    sw_status TEXT
+    '''
+    csv_to_db(tbl_options)
+
+#-----------------------------
+    
+##Import into dbtable:  SwitchPortUsage.csv
+    tbl_options.csvFile = 'SwitchPortUsage'
+    tbl_options.csvColumns = ['a', 'f', 'k', 'l', 'm', 'p', 'q', 'r']
+
+    tbl_options.dbTableName = 'ports'
+    tbl_options.dbColNames = '''
+    sw_name TEXT PRIMARY KEY,
+    total_ports INT,
+    unlic_ports INT,
+    unused_ports INT,
+    isl_ports INT,
+    total_devices INT,
+    disks INT,
+    hosts INT
+    '''
+    csv_to_db(tbl_options)
+
+#-----------------------------
+
+##Import into dbtable: SwitchFRU.csv
+    tbl_options.csvFile = 'SwitchFRUs'
+    tbl_options.csvColumns = ['a', 'e', 'h', 'f', 'g']
+
+    tbl_options.dbTableName = 'frus'
+    tbl_options.dbColNames = '''
+    sw_name TEXT,
+    fru_type TEXT,
+    fru_sn,
+    fru_slot TEXT,
+    fru_status TEXT
+    '''
+    csv_to_db(tbl_options)
+
+#-----------------------------
+    
+##Import into dbtable:  FabricSummary.csv
+    tbl_options.csvFile = 'FabricSummary'
+    tbl_options.csvColumns = ['a', 'r', 'v', 'z', 'ad', 'ag']
+
+    tbl_options.dbTableName = 'zones'
+    tbl_options.dbColNames = '''
+    sw_fabric TEXT,
+    active_zoneCfg TEXT,
+    hang_alias INT,
+    hang_zones INT,
+    hang_configs INT,
+    zone_dbUsed TEXT
+    '''
+    csv_to_db(tbl_options)
+#-----------------------------
+    
+
+    #close the connection to the database file
+    conn.commit()
+    conn.close()
+
+#----------------------------------------------------------------
+    # Now we have all the relevant data from the csv files
+    # Ready to make slides
+#----------------------------------------------------------------
+
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#-----------------------------------
+
+
+    
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+
+def createSlideDeck_mixSans(tbl_options):
+    #This function creates a slide deck
+    #with ALL the csv files extracted in the collector folder
+    #from all the SAN Reports downloaded
+    #
+    
+    #-----------------------------------
+    # TO DO
+    #-----------------------------------
+
+    #MAKE A FUNCTION TO READ a slide definition config file
+    #AND GENERATE SLIDE DECK
+
+    #IF THERE IS NO DATA FOR A SLIDE, PRINT A NOTE ON THE SLIDE: NO DATA!
+                        
+###-----------------------------------
+###XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+##    
+##    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+##
+####    #Open Slide Deck Template
+####    prs = Presentation(slides_template_path)
+##
+##    #initialize table's default options
+##    #tbl_options = Table_Options()
+##
+##    #set desired table options
+##    tbl_options.csvPath = csvPath
+####    tbl_options.presentation = prs
+##
+##
+##    # Connect to the database file
+##    conn = sql.connect(sqlite_file)
+##    tbl_options.dbConnection = conn
+##    c = conn.cursor()
+##
+###---------------------------------
+##
+####Import into dbtable: SwitchSummary.csv
+##    tbl_options.csvFile = 'SwitchSummary'
+##    tbl_options.csvColumns = ['a', 'k', 'c', 'f', 'i', 's', 't']
+##
+##    tbl_options.dbTableName = 'switches'
+##    tbl_options.dbColNames = '''
+##    sw_name TEXT PRIMARY KEY,
+##    sw_sn TEXT,
+##    sw_model TEXT,
+##    sw_firmware TEXT,
+##    sw_fabric TEXT,
+##    sw_state TEXT,
+##    sw_status TEXT
+##    '''
+##    csv_to_db(tbl_options)
+##
+###-----------------------------
+##    
+####Import into dbtable:  SwitchPortUsage.csv
+##    tbl_options.csvFile = 'SwitchPortUsage'
+##    tbl_options.csvColumns = ['a', 'f', 'k', 'l', 'm', 'p', 'q', 'r']
+##
+##    tbl_options.dbTableName = 'ports'
+##    tbl_options.dbColNames = '''
+##    sw_name TEXT PRIMARY KEY,
+##    total_ports INT,
+##    unlic_ports INT,
+##    unused_ports INT,
+##    isl_ports INT,
+##    total_devices INT,
+##    disks INT,
+##    hosts INT
+##    '''
+##    csv_to_db(tbl_options)
+##
+###-----------------------------
+##
+####Import into dbtable: SwitchFRU.csv
+##    tbl_options.csvFile = 'SwitchFRUs'
+##    tbl_options.csvColumns = ['a', 'e', 'h', 'f', 'g']
+##
+##    tbl_options.dbTableName = 'frus'
+##    tbl_options.dbColNames = '''
+##    sw_name TEXT,
+##    fru_type TEXT,
+##    fru_sn,
+##    fru_slot TEXT,
+##    fru_status TEXT
+##    '''
+##    csv_to_db(tbl_options)
+##
+###-----------------------------
+##    
+####Import into dbtable:  FabricSummary.csv
+##    tbl_options.csvFile = 'FabricSummary'
+##    tbl_options.csvColumns = ['a', 'r', 'v', 'z', 'ad', 'ag']
+##
+##    tbl_options.dbTableName = 'zones'
+##    tbl_options.dbColNames = '''
+##    sw_fabric TEXT,
+##    active_zoneCfg TEXT,
+##    hang_alias INT,
+##    hang_zones INT,
+##    hang_configs INT,
+##    zone_dbUsed TEXT
+##    '''
+##    csv_to_db(tbl_options)
+###-----------------------------
+##    
+##
+###----------------------------------------------------------------
+##    # Now we have all the relevant data from the csv files
+##    # Ready to make slides
+###----------------------------------------------------------------
+##
+###XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+###-----------------------------------
+
+
+#--------------------------------------------------------
+#--------------------------------------------------------
+#--------------------------------------------------------
+#--------------------------------------------------------
+    #SLIDES
+#--------------------------------------------------------
+    #import CSV files into db tables
+    #loadDbTables(tbl_options)
+
+#THIS MIGHT NOT BE NEEDED.
+#THE LOADdb FUNCTION ALSO SUPPLIES THE conn handler to the database
+# via tbl_options.dbConnection
+    # Connect to the database file
+    conn = sql.connect(sqlite_file)
+    tbl_options.dbConnection = conn
+    c = conn.cursor()
+
+
+    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+
+    #Open Slide Deck Template
+    prs = Presentation(slides_template_path)
+    tbl_options.presentation = prs
+
 #--------------------------------------------------------
     ###SLIDE COPY
     ##copy_slide(prs, prs, 0)
@@ -434,7 +923,7 @@ def createSlideDeck(custData):
         prs.save(folder + shName + '-'+ timestamp + '.pptx')
         
 
-
+        
 #/////////////////////////////////////////////////////////////////
 #FOR TESTING JUST SLIDE DECK CREATION, EXECUTE THIS SCRIPT
 #this uses default csv files already unzipped on the csvTemp directory

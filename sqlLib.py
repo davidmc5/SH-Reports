@@ -41,12 +41,16 @@ def fill_dbTable(options):
     #Populate the db table (switch) with the values from the csv file 
 
     #insert each row of csv records into database
+
+    #THIS HAS BEEN MODIFIED. NOW   
     #remove the first record since it is headers: (islice(data, 1, none)
     #this avoids making an expensive copy of the list to remove the header row.
 
     #inserts all rows from the list at once
+##    dbCursor.executemany('INSERT OR IGNORE INTO {tn} VALUES ({q})'\
+##                  .format(tn=tblName, q=qmark),islice(getCsvData(options), 1, None))
     dbCursor.executemany('INSERT OR IGNORE INTO {tn} VALUES ({q})'\
-                  .format(tn=tblName, q=qmark),islice(getCsvData(options), 1, None))
+                  .format(tn=tblName, q=qmark),getCsvData(options))
 
 
 
@@ -58,7 +62,7 @@ def ColCount(db_cursor, table):
 
 def csv_to_db(options):
     ''' creates a table named dbTableName with the felds dbColNames
-        and polulates it (fill_dbTable) with the data from the csv file
+        and populates it (fill_dbTable) with the data from the csv file
         '''
     dbConn = options.dbConnection
     dbCursor = dbConn.cursor()

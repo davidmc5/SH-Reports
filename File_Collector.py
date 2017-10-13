@@ -14,7 +14,11 @@ from timeit import default_timer as timer
 #Note that the following SH Libraries need to be in the same directory as the running code's file
 #(or in the pyhton path)
 from shLib import *
-from slDeck import createSlideDeck
+#from slDeck import createSlideDeck
+from slDeck import createSlideDeck_mixSans
+from slDeck import loadDbTables
+
+from slLib import Table_Options
 import msvcrt
 
 '''
@@ -33,7 +37,8 @@ and typing in python scriptname.py in the console.
 # TO DO
 # ------------------
 # 1) archive non SH zip files to ARCHIVE so that we don't waste time on each loop
-#(make sure first that there are no existing san health folders with zip files before activating feature!
+#(make sure first that there are no existing san health folders with zip files
+#before activating feature!
 
 # 2) archive other non-SH zip files in the san health repository.
 #(will speed up scanning)
@@ -43,14 +48,21 @@ and typing in python scriptname.py in the console.
 
 # -----------------------------------------------------------------
 
-#delete any old files in collector folder
-initFolders()
 
 #make a start log entry
 logEntry("Started")
 
+#delete any old files in collector folder
+initFolders()
 
 loopCount = 0
+
+#initialize table's default options
+options = Table_Options()
+
+###this is for shLib\archiveBad but it is not working.
+##global blacklist
+##blacklist = [] #keep track of bad files that can't be moved
 
 while True:
     
@@ -61,20 +73,24 @@ while True:
     start = timer()
     loopCount += 1
 
-    
+
     #get a list of customer folders
     try:
         customers = os.listdir(drive + startFolder)
+
     except:
-        print "Could not retrieve the list of folders"
-        #Wait 5 minutes in case there are temporary networt issues
-        time.sleep(300)
+        #print "Could not retrieve the list of folders"
+        logEntry("Folder List Error", "Could not retrieve folders. Waiting 10 sec")
+        #Wait in case there are temporary network issues
+        time.sleep(10)
         #And start a new loop
         continue
 
     for customer in customers:
 
-        #download zip files (if any) to local collector folder
+        options.csvPathList = []
+
+        #download all zip files (if any) to local collector folder
         #(collector folder should be empty)
         #WHEN DOES THIS COLLECTOR FOLDER GETS RECREATED? -------------XXXXXXXXXXXXXXXXX
         #RENAME THIS TO COLLECTSHZIPFILES
@@ -84,35 +100,65 @@ while True:
         #now we have all SH ZIP files in the collector folder
         #Look inside each ZIP file for another ZIP with the CSV files
         for shFile in get_shFiles():
-            
+                        
             data = extract_csvFiles(shFile)
             if data == None:
                 #no csv files in this sh-zip file
+                logEntry('No CSVs', shFile)
+                archiveBad(customer, shFile)
                 continue
 
             if data == 'Bad':
-                print 'Bad zip', shFile
-                logEntry('Bad zip', shFile)
-                #add here a check so that if the same bad file
-                #is downloaded more than once, archive it to /TEMP
-                #archiveBad(customer, shFile)
-                #allow a second chance in case the download happened
-                #before the upload from the user has finished. 
-
-                #for the time being, just skip
+                #print 'Bad zip', shFile
+                logEntry('Bad Zip', shFile)
+                archiveBad(customer, shFile)
                 continue
             
-            #current SH report variables 
+            #This SH Report has CSV files. Create slide deck
+            #current SAN / SH Report variables 
             csvPath, shName, sanName, shYear = data
+
+            options.csvPathList.append(csvPath)
+            
+            print 'SAN:', sanName
 
             #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
+            options.custData = custData
 
-            createSlideDeck(custData)
+            
 
-            archiveFiles(shFile, custData, 'no_remote')
+# ------------------------------------------
+# put here a function to populate the database
+# from all the CSV files from all the reports in the folder
+# Remove this function from slDeck.py
 
-            logEntry('Slides Created', customer, shName)
+        loadDbTables(options)
+            
+# ------------------------------------------
+        #createSlideDeck(options)
+        createSlideDeck_mixSans(options)
+
+        #Archive only the local SH Zip files ('no_remote')
+        #to avoid excesive storage usage.
+        archiveFiles(shFile, custData, 'no_remote')
+
+        logEntry('Slides Created', customer, shName)
+        
+        #quit()
+# ------------------------------------------
+            #The folowing code is indented to create
+            # a separate slide deck for each SAN / SH report
+### ------------------------------------------
+##            #createSlideDeck(options)
+##            createSlideDeck_mixSans(options)
+##
+##            #Archive only the local SH Zip files ('no_remote')
+##            #to avoid excesive storage usage.
+##            archiveFiles(shFile, custData, 'no_remote')
+##
+##            logEntry('Slides Created', customer, shName)
+### ------------------------------------------
             
         #delete the csv directory to remove the used files
         initFolders()

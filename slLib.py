@@ -13,7 +13,13 @@ class Table_Options:
     def __init__(self):
         #set default options
         self.presentation = None
-        self.csvPath = None
+
+        self.custData = None
+        #self.csvPath = None
+
+        self.csvPathList = None # a list of csvPath from file colector loop
+
+        
         self.csvFile = None
         self.csvColumns = []
 
