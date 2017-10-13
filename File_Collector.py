@@ -118,6 +118,7 @@ while True:
             #current SAN / SH Report variables 
             csvPath, shName, sanName, shYear = data
 
+            #add to a list all the sh names common to each report's csv files
             options.csvPathList.append(csvPath)
             
             print 'SAN:', sanName
@@ -128,14 +129,15 @@ while True:
 
             
 
-# ------------------------------------------
-# put here a function to populate the database
-# from all the CSV files from all the reports in the folder
-# Remove this function from slDeck.py
+        # ------------------------------------------
+        # populate the database
+        # from all the CSV files from all the SH reports in the folder
+        # Remove this function from slDeck.py
 
         loadDbTables(options)
-            
-# ------------------------------------------
+           
+        # ------------------------------------------
+        
         #createSlideDeck(options)
         createSlideDeck_mixSans(options)
 

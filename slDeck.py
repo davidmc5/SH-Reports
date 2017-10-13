@@ -515,7 +515,9 @@ def loadDbTables(tbl_options):
 
     #close the connection to the database file
     conn.commit()
-    conn.close()
+
+    #leave the database open. It is closed by createSlide deck
+    #conn.close()
 
 #----------------------------------------------------------------
     # Now we have all the relevant data from the csv files
@@ -544,108 +546,6 @@ def createSlideDeck_mixSans(tbl_options):
     #AND GENERATE SLIDE DECK
 
     #IF THERE IS NO DATA FOR A SLIDE, PRINT A NOTE ON THE SLIDE: NO DATA!
-                        
-###-----------------------------------
-###XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-##    
-##    customer, csvPath, shName, sanName, shYear = tbl_options.custData
-##
-####    #Open Slide Deck Template
-####    prs = Presentation(slides_template_path)
-##
-##    #initialize table's default options
-##    #tbl_options = Table_Options()
-##
-##    #set desired table options
-##    tbl_options.csvPath = csvPath
-####    tbl_options.presentation = prs
-##
-##
-##    # Connect to the database file
-##    conn = sql.connect(sqlite_file)
-##    tbl_options.dbConnection = conn
-##    c = conn.cursor()
-##
-###---------------------------------
-##
-####Import into dbtable: SwitchSummary.csv
-##    tbl_options.csvFile = 'SwitchSummary'
-##    tbl_options.csvColumns = ['a', 'k', 'c', 'f', 'i', 's', 't']
-##
-##    tbl_options.dbTableName = 'switches'
-##    tbl_options.dbColNames = '''
-##    sw_name TEXT PRIMARY KEY,
-##    sw_sn TEXT,
-##    sw_model TEXT,
-##    sw_firmware TEXT,
-##    sw_fabric TEXT,
-##    sw_state TEXT,
-##    sw_status TEXT
-##    '''
-##    csv_to_db(tbl_options)
-##
-###-----------------------------
-##    
-####Import into dbtable:  SwitchPortUsage.csv
-##    tbl_options.csvFile = 'SwitchPortUsage'
-##    tbl_options.csvColumns = ['a', 'f', 'k', 'l', 'm', 'p', 'q', 'r']
-##
-##    tbl_options.dbTableName = 'ports'
-##    tbl_options.dbColNames = '''
-##    sw_name TEXT PRIMARY KEY,
-##    total_ports INT,
-##    unlic_ports INT,
-##    unused_ports INT,
-##    isl_ports INT,
-##    total_devices INT,
-##    disks INT,
-##    hosts INT
-##    '''
-##    csv_to_db(tbl_options)
-##
-###-----------------------------
-##
-####Import into dbtable: SwitchFRU.csv
-##    tbl_options.csvFile = 'SwitchFRUs'
-##    tbl_options.csvColumns = ['a', 'e', 'h', 'f', 'g']
-##
-##    tbl_options.dbTableName = 'frus'
-##    tbl_options.dbColNames = '''
-##    sw_name TEXT,
-##    fru_type TEXT,
-##    fru_sn,
-##    fru_slot TEXT,
-##    fru_status TEXT
-##    '''
-##    csv_to_db(tbl_options)
-##
-###-----------------------------
-##    
-####Import into dbtable:  FabricSummary.csv
-##    tbl_options.csvFile = 'FabricSummary'
-##    tbl_options.csvColumns = ['a', 'r', 'v', 'z', 'ad', 'ag']
-##
-##    tbl_options.dbTableName = 'zones'
-##    tbl_options.dbColNames = '''
-##    sw_fabric TEXT,
-##    active_zoneCfg TEXT,
-##    hang_alias INT,
-##    hang_zones INT,
-##    hang_configs INT,
-##    zone_dbUsed TEXT
-##    '''
-##    csv_to_db(tbl_options)
-###-----------------------------
-##    
-##
-###----------------------------------------------------------------
-##    # Now we have all the relevant data from the csv files
-##    # Ready to make slides
-###----------------------------------------------------------------
-##
-###XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-###-----------------------------------
-
 
 #--------------------------------------------------------
 #--------------------------------------------------------
@@ -656,12 +556,15 @@ def createSlideDeck_mixSans(tbl_options):
     #import CSV files into db tables
     #loadDbTables(tbl_options)
 
-#THIS MIGHT NOT BE NEEDED.
+#THIS MIGHT NOT BE NEEDED. <<<------------------------XXX
+    
 #THE LOADdb FUNCTION ALSO SUPPLIES THE conn handler to the database
 # via tbl_options.dbConnection
+
     # Connect to the database file
-    conn = sql.connect(sqlite_file)
-    tbl_options.dbConnection = conn
+    conn = tbl_options.dbConnection
+    #conn = sql.connect(sqlite_file)
+    #tbl_options.dbConnection = conn
     c = conn.cursor()
 
 
