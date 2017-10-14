@@ -15,7 +15,7 @@ from timeit import default_timer as timer
 #(or in the pyhton path)
 from shLib import *
 #from slDeck import createSlideDeck
-from slDeck import createSlideDeck_mixSans
+from slDeck import createSlideDeck
 from slDeck import loadDbTables
 
 from slLib import Table_Options
@@ -132,14 +132,13 @@ while True:
         # ------------------------------------------
         # populate the database
         # from all the CSV files from all the SH reports in the folder
-        # Remove this function from slDeck.py
-
+        # Remove this function from slDeck.py?
+        
+        #Open the database and load one table per csv file
         loadDbTables(options)
-           
-        # ------------------------------------------
         
         #createSlideDeck(options)
-        createSlideDeck_mixSans(options)
+        createSlideDeck(options)
 
         #Archive only the local SH Zip files ('no_remote')
         #to avoid excesive storage usage.
