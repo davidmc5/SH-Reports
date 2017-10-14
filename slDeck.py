@@ -57,7 +57,7 @@ def loadDbTables(tbl_options):
     #Is this needed? csvPathList is storing those now.
     tbl_options.csvPath = csvPath
 
-    # Connect to the database file
+    # Open the database
     conn = sql.connect(sqlite_file)
     tbl_options.dbConnection = conn
     c = conn.cursor()

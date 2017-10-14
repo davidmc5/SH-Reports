@@ -88,7 +88,9 @@ while True:
 
     for customer in customers:
 
+        #clear the csvPath and san lists
         options.csvPathList = []
+        options.sanList = []
 
         #download all zip files (if any) to local collector folder
         #(collector folder should be empty)
@@ -120,12 +122,15 @@ while True:
 
             #add to a list all the sh names common to each report's csv files
             options.csvPathList.append(csvPath)
+            options.sanList.append(sanName)
             
             print 'SAN:', sanName
 
             #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
             options.custData = custData
+
+            #print custData
 
             
 

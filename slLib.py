@@ -18,6 +18,7 @@ class Table_Options:
         #self.csvPath = None
 
         self.csvPathList = None # a list of csvPath from file colector loop
+        self.sanList = None # the list of SAN names with unzipped csv files
 
         
         self.csvFile = None
