@@ -436,8 +436,8 @@ def col2num(col):
 
 
 #----------------------------------------
-# modifying this function to get ALL the csv files extracted to the csvTemp directory
-# and adding the SAN name
+# modified this function to get ALL the csv files extracted
+# to the csvTemp directory, and adding the SAN name
 
 def getCsvData(options):
     #getCsvData extracts the specified columns from the csv file
@@ -460,10 +460,15 @@ def getCsvData(options):
     #print 'csvPath', options.csvPath
     #print 'csvTarget', csvTarget
 
-
-    for csvPath in options.csvPathList:
+#------------------------
+##    for csvPath in options.csvPathList:
+##        csvFile = csvPath + csvTarget
+#------------------------
+#------------------------
+    for san in options.sanList:
+        sanName, csvPath = san
         csvFile = csvPath + csvTarget
-        #print csvFile
+#------------------------
         
       
         with open(csvFile, 'rb') as f:
@@ -481,6 +486,9 @@ def getCsvData(options):
                 
                 #append each row data to a list
                 row=[]
+                
+                row.append(sanName)
+                
                 #grab only the columns requested
                 for col in columns:
                     row.append(shRow[col2num(col)-1]) #column index start at 1

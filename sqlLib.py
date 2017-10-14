@@ -32,25 +32,35 @@ def fill_dbTable(options):
     dbCursor = dbConn.cursor()
     tblName = options.dbTableName
 
+    csvData = getCsvData(options)
+
     #get the number of columns to import from csv file
-    nColumns = len(options.csvColumns)
+    #nColumns = len(options.csvColumns)
+    nColumns = len(csvData[0])
+    print 'columns', nColumns
     
     #set the number of data values' placeholders (?, ?, ....?) based on the number of columns
     qmark = ','.join(['?'] * nColumns)
 
     #Populate the db table (switch) with the values from the csv file 
 
-    #insert each row of csv records into database
+##-----------------------------
+    #THIS HAS BEEN MODIFIED. Headers are now being removed by shLib\getCsvData()  
+        #remove the first record since it is headers: (islice(data, 1, none)
+        #this avoids making an expensive copy of the list to remove the header row.
 
-    #THIS HAS BEEN MODIFIED. NOW   
-    #remove the first record since it is headers: (islice(data, 1, none)
-    #this avoids making an expensive copy of the list to remove the header row.
-
-    #inserts all rows from the list at once
+        #inserts all rows from the list at once
 ##    dbCursor.executemany('INSERT OR IGNORE INTO {tn} VALUES ({q})'\
 ##                  .format(tn=tblName, q=qmark),islice(getCsvData(options), 1, None))
+#-----------------------------
+    #insert each row of csv records into database
     dbCursor.executemany('INSERT OR IGNORE INTO {tn} VALUES ({q})'\
-                  .format(tn=tblName, q=qmark),getCsvData(options))
+                  .format(tn=tblName, q=qmark), csvData)
+
+###-----------------------------
+##    #insert each row of csv records into database
+##    dbCursor.executemany('INSERT OR IGNORE INTO {tn} VALUES ({q})'\
+##                  .format(tn=tblName, q=qmark),getCsvData(options))
 
 
 

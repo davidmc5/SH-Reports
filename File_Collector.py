@@ -121,8 +121,8 @@ while True:
             csvPath, shName, sanName, shYear = data
 
             #add to a list all the sh names common to each report's csv files
-            options.csvPathList.append(csvPath)
-            options.sanList.append(sanName)
+            #options.csvPathList.append(csvPath)
+            options.sanList.append( (sanName, csvPath) )
             
             print 'SAN:', sanName
 
@@ -141,6 +141,8 @@ while True:
         
         #Open the database and load one table per csv file
         loadDbTables(options)
+
+        #quit()
         
         #createSlideDeck(options)
         createSlideDeck(options)

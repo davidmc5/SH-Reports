@@ -69,6 +69,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'switches'
     tbl_options.dbColNames = '''
+    san TEXT,
     sw_name TEXT PRIMARY KEY,
     sw_sn TEXT,
     sw_model TEXT,
@@ -87,6 +88,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'ports'
     tbl_options.dbColNames = '''
+    san TEXT,
     sw_name TEXT PRIMARY KEY,
     total_ports INT,
     unlic_ports INT,
@@ -106,6 +108,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'frus'
     tbl_options.dbColNames = '''
+    san TEXT,
     sw_name TEXT,
     fru_type TEXT,
     fru_sn,
@@ -122,6 +125,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'zones'
     tbl_options.dbColNames = '''
+    san TEXT,
     sw_fabric TEXT,
     active_zoneCfg TEXT,
     hang_alias INT,
