@@ -11,7 +11,7 @@ def formatDbUsed(data):
     newData = []
 
     #grab the dbUse value
-    for row in data:
+    for row in data:        
 
         #Example: (row[6] = 11.7% of 1045274B)
         #Example: (row[6] = 11% of 1045274B)
@@ -165,6 +165,9 @@ def createSlideDeck(tbl_options):
     #FROM EACH SH REPORT
     #AND AFTER THAT ONE SINGLE DECK FOR ALL REPORTS COMBINED
     
+    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    print 'sanName', sanName
+    
 #--------------------------------------------------------
     #SLIDES
 #--------------------------------------------------------
@@ -193,6 +196,11 @@ def saveDeck(tbl_options):
     #using the current san health file name
     customer, csvPath, shName, sanName, shYear = tbl_options.custData
     folder = drive + startFolder + customer + shFolder
+    
+    #but if a slide deck with the same name already exists and it is open
+    #add a timestamp to the name to make it unique    
+    timestamp = datetime.datetime.now().strftime("%y-%m-%d-%H%M")
+
     prs = tbl_options.presentation
     
     try:

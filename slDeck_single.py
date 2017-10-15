@@ -84,12 +84,16 @@ def singleDeck(tbl_options):
         SUM(ports.total_devices)
     FROM
         switches s
-    INNER JOIN ports ON s.sw_name = ports.sw_name
+
+    INNER JOIN 
+        ports ON s.sw_name = ports.sw_name
+        AND
+        s.san = ?
     GROUP BY
         s.sw_fabric, s.sw_model
     ORDER BY
         s.sw_fabric, s.sw_model, count
-    ''')
+    ''', (sanName,))
 
     data = c.fetchall()
     #format data with group headers (remove the group = first column data)
@@ -134,9 +138,11 @@ def singleDeck(tbl_options):
         zones
     WHERE
         active_zoneCfg != 'N/A'
+        AND
+        san = ?
      ORDER BY
         sw_fabric
-   ''')
+   ''', (sanName,))
     data = c.fetchall()
     
     #covert data on 'dbUsed' column from Bytes to MB
@@ -198,15 +204,17 @@ def singleDeck(tbl_options):
         LEFT JOIN (
             SELECT sw_name, COUNT(*) AS fru_cnt
             FROM frus
-            WHERE fru_status != ''
+            WHERE 
+                fru_status != ''
             GROUP BY sw_name
             ) f
         ON f.sw_name = s.sw_name
+    WHERE s.san = ?
     GROUP BY
         s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
     ORDER BY
         s.sw_fabric, s.sw_model, cnt
-    ''')
+    ''', (sanName,))
     #--------------------------------
 
 ##    # this prints db column headers for the query, if used right after a query
