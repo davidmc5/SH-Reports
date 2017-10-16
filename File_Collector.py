@@ -144,7 +144,7 @@ while True:
 
         #quit()
         
-        #createSlideDeck(options)
+        #create Slide Deck(s) 
         createSlideDeck(options)
 
         #Archive only the local SH Zip files ('no_remote')
@@ -153,21 +153,6 @@ while True:
 
         logEntry('Slides Created', customer, shName)
         
-        #quit()
-# ------------------------------------------
-            #The folowing code is indented to create
-            # a separate slide deck for each SAN / SH report
-### ------------------------------------------
-##            #createSlideDeck(options)
-##            createSlideDeck_mixSans(options)
-##
-##            #Archive only the local SH Zip files ('no_remote')
-##            #to avoid excesive storage usage.
-##            archiveFiles(shFile, custData, 'no_remote')
-##
-##            logEntry('Slides Created', customer, shName)
-### ------------------------------------------
-            
         #delete the csv directory to remove the used files
         initFolders()
 
