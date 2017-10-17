@@ -91,6 +91,7 @@ while True:
         #clear the csvPath and san lists
         options.csvPathList = []
         options.sanList = []
+        #options.shFiles = []
 
         #download all zip files (if any) to local collector folder
         #(collector folder should be empty)
@@ -101,8 +102,9 @@ while True:
 
         #now we have all SH ZIP files in the collector folder
         #Look inside each ZIP file for another ZIP with the CSV files
+        
         for shFile in get_shFiles():
-                        
+                                    
             data = extract_csvFiles(shFile)
             if data == None:
                 #no csv files in this sh-zip file
@@ -119,20 +121,25 @@ while True:
             #This SH Report has CSV files. Create slide deck
             #current SAN / SH Report variables 
             csvPath, shName, sanName, shYear = data
+            
+            #save report's name and file name to archive.
+            #options.shFiles.append( (shName, shFile) )
 
             #add to a list all the sh names common to each report's csv files
             #options.csvPathList.append(csvPath)
-            options.sanList.append( (sanName, csvPath) )
-            
-            print 'SAN:', sanName
+            options.sanList.append( (shName, shFile, sanName, csvPath) )
 
             #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
             options.custData = custData
-
             #print custData
-
             
+            #do not archive the remote report zip files for this customer
+            #place this in a config file!
+            options.archv_opt = 'no_remote'
+
+        # Store the list of all the SH.ZIP file names processed for this customer
+        #options.shFiles = shFileNames    
 
         # ------------------------------------------
         # populate the database
@@ -149,9 +156,10 @@ while True:
 
         #Archive only the local SH Zip files ('no_remote')
         #to avoid excesive storage usage.
-        archiveFiles(shFile, custData, 'no_remote')
+        #archiveFiles(shFile, custData, 'no_remote')
+        archiveFiles(options)
 
-        logEntry('Slides Created', customer, shName)
+        #logEntry('Slides Created', customer, shName)
         
         #delete the csv directory to remove the used files
         initFolders()

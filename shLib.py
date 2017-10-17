@@ -119,59 +119,66 @@ def initFolders():
 
 
 
-def archiveFiles(shFile, custData, archv_opt=None):
+#def archiveFiles(shFile, custData, archv_opt=None):
+def archiveFiles(options):
     #Archive remote and local copies of sh zip files
 
     #retrieve SH report variables
-    customer, csvPath, shName, sanName, shYear = custData
-
+    customer, csvPath, shName, sanName, shYear = options.custData
+    
+    #print 'shName', shName
+    #print 'shFile', shFile
+    
     #remote folder
     folder = drive + startFolder + customer + shFolder
 
     #if option 'no_remote' has been included, do not archive the remote file.
+    archv_opt = options.archv_opt
     
+    for san in options.sanList:
+        shName, shFile, sanName, csvPath = san
+        print 'ARCHIVING', shFile
 
-    if archv_opt != 'no_remote':
-        #Verify if the remote archive directory already exists
-        #or create a new one to archive the processed remote SH Files
-        #Use the year from the file name as the archive directory
+        if archv_opt != 'no_remote':
+            #Verify if the remote archive directory already exists
+            #or create a new one to archive the processed remote SH Files
+            #Use the year from the file name as the archive directory
+            try:
+                os.makedirs(folder + shYear)
+            except OSError as exception:
+                if exception.errno != errno.EEXIST:
+                    #print 'problem trying to create folder', folder + shYear
+                    logEntry('Folder Creation Error', folder + shYear)
+                    
+            #Move sh zip file to the archive (year) directory to avoid re-processing
+            startFile = folder + shFile
+            endFile = folder + shYear + '/' + shFile
+            shutil.move(startFile, endFile)
+        else:
+            #Option "no_remote" given:
+            #delete remote SH file (Do not archive)
+            startFile = folder + shFile
+            try:
+                os.remove(startFile)
+            except:
+                #This does not seem this is necessary.
+                #The zip file gets deleted even if one of its sub-files is open
+                #print tDate, tTime, 'Error: Can\'t delete Remote SH File'
+                logEntry('Folder Deletion Error', 'Can\'t delete Remote SH File', folder + shFile)
+
+        #Local zip file
+        #Verify it exists or create a directory to archive the local copy of SH Files
         try:
-            os.makedirs(folder + shYear)
+            os.makedirs(archiveFolder)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
-                #print 'problem trying to create folder', folder + shYear
-                logEntry('Folder Creation Error', folder + shYear)
-                
-        #Move sh zip file to the archive (year) directory to avoid re-processing
-        startFile = folder + shFile
-        endFile = folder + shYear + '/' + shFile
-        shutil.move(startFile, endFile)
-    else:
-        #Option "no_remote" given:
-        #delete remote SH file (Do not archive)
-        startFile = folder + shFile
-        try:
-            os.remove(startFile)
-        except:
-            #This does not seem this is necessary.
-            #The zip file gets deleted even if one of its sub-files is open
-            #print tDate, tTime, 'Error: Can\'t delete Remote SH File'
-            logEntry('Folder Deletion Error', 'Can\'t delete Remote SH File', folder + shFile)
-
-
-    #Local zip file
-    #Verify it exists or create a directory to archive the local copy of SH Files
-    try:
-        os.makedirs(archiveFolder)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            logEntry('Folder Creation Error', 'Can\'t create local archive folder', archiveFolder)
-            time.sleep(60)
-            #raise
-    #Move sh zip file to the local archive directory 
-    src = collectorFolder + shFile
-    dst = archiveFolder + shFile
-    shutil.move(src, dst)
+                logEntry('Folder Creation Error', 'Can\'t create local archive folder', archiveFolder)
+                time.sleep(60)
+                #raise
+        #Move sh zip file to the local archive directory 
+        src = collectorFolder + shFile
+        dst = archiveFolder + shFile
+        shutil.move(src, dst)
 
 
 def archiveBad(customer, shFile):
@@ -466,7 +473,7 @@ def getCsvData(options):
 #------------------------
 #------------------------
     for san in options.sanList:
-        sanName, csvPath = san
+        shName, shFile, sanName, csvPath = san
         csvFile = csvPath + csvTarget
 #------------------------
         

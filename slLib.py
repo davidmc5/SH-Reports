@@ -15,12 +15,13 @@ class Table_Options:
         self.presentation = None
 
         self.custData = None
-        #self.csvPath = None
+        self.archv_opt = None
+
+        #self.shFiles = None #list with complete SH report.ZIP file names (minus the path)
 
         #self.csvPathList = None # a list of csvPath from file colector loop
         self.sanList = None # the list of SAN names and csvPath of retrieved csv files
 
-        
         self.csvFile = None
         self.csvColumns = []
 

@@ -5,6 +5,7 @@ import re
 import datetime
 from slDeck_single import singleDeck
 from slDeck_multi import multiDeck
+from shLib import logEntry
 
 #------------------------------------------------
 def formatDbUsed(data):
@@ -168,7 +169,7 @@ def createSlideDeck(tbl_options):
     for san in tbl_options.sanList:
         #retrieve next SAN data
         customer, csvPath, shName, sanName, shYear = tbl_options.custData
-        sanName, csvPath = san
+        shName, shFile, sanName, csvPath = san
         #and store it for the slide creator function
         custData = (customer, csvPath, shName, sanName, shYear)
         tbl_options.custData = custData
@@ -176,6 +177,7 @@ def createSlideDeck(tbl_options):
         #make and save slideDeck
         singleDeck(tbl_options)
         print 'SAN', sanName
+        logEntry('Slides Created', customer, shName)
         
     if len(tbl_options.sanList) > 1:
         # create a deck with the agregated data from all the downloaded reports
@@ -186,6 +188,7 @@ def createSlideDeck(tbl_options):
 
         multiDeck(tbl_options)
         print 'SAN', sanName
+        logEntry('Slides Created', customer, 'Agregate')
 
 #--------------------------------------------------------------------
    # END OF SLIDES
@@ -212,11 +215,13 @@ def saveDeck(tbl_options):
     #but if a slide deck with the same name already exists and it is open
     #add a timestamp to the name to make it unique    
     timestamp = datetime.datetime.now().strftime("%y-%m-%d-%H%M")
+    datestamp = datetime.datetime.now().strftime("%y-%m-%d")
+    
 
     prs = tbl_options.presentation
 
     if sanName == 'ALL':
-        shName = customer + '_AGGREGATE_' + timestamp
+        shName = customer + '_AGGREGATE_' + datestamp
         
     try:
         prs.save(folder + shName + '.pptx')
