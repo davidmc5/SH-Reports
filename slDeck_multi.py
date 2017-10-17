@@ -32,8 +32,8 @@ def multiDeck(tbl_options):
     #TITLE SLIDE
 
     #grab first (title) slide (index=0)
-    slide1 = prs.slides[0]
-    shapes = slide1.shapes
+    slide = prs.slides[0]
+    shapes = slide.shapes
     
     #add_textbox(left, top, width, height)
     subtxt = shapes.add_textbox(Inches(2),Inches(4), Inches(10), Inches(1))
@@ -43,24 +43,29 @@ def multiDeck(tbl_options):
     
 #--------------------------------------------------------------------
     
-    ##SLIDE WITH JUST TEXT
+    ##SLIDE: SAN Health Combined Report
+    # Slide to show the SH reports used in the agregate.
     
-    ##title_slide_layout = prs.slide_layouts[1]
-    ##slide = prs.slides.add_slide(title_slide_layout)
-    ##title = slide.shapes.title
-    ##subtitle = slide.placeholders[1]
-    ##title.text = "Hello, World!"
-    ##subtitle.text = "python-pptx was here!"
-#--------------------------------------------------------------------
-
-##    #SLIDE WITH ONE TABLE - FROM SINGLE CSV FILE
+    title_slide_layout = prs.slide_layouts[1]
+    slide = prs.slides.add_slide(title_slide_layout)
+    title = slide.shapes.title
+    subtitle = slide.placeholders[1]
+    title.text = "SAN Health Combined Report"
+    subtitle.text = customer + ' - Reports Included:'
     
-##    tbl_options.title = 'Fabric Summary'
-##    tbl_options.subtitle = 'SAN: '+ sanName
-##    tbl_options.csvFile = 'FabricSummary'
-##    tbl_options.csvColumns = ['a', 'c', 'd', 'e', 'f', 'g', 'k', 'l', 'm']
-##    create_single_table(tbl_options)
-
+    #add_textbox(left, top, width, height)
+    shape = slide.shapes
+    txtBox = shape.add_textbox(Inches(1.5),Inches(3), Inches(10), Inches(3.5))
+    txtBox.text_frame.paragraphs[0].font.size = Pt(20)
+    txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(0,0,0) # black
+    #place all the report file names in a list
+    names = []
+    for san in tbl_options.sanList:
+        names.append(san[0])
+    #Add new line characters between each report name        
+    paragraph = '\n'.join(names)
+    txtBox.text = paragraph
+            
 #--------------------------------------------------------------------
 
     #SLIDE: FABRIC SUMMARY TABLE

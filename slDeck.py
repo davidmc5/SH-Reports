@@ -170,6 +170,9 @@ def createSlideDeck(tbl_options):
         #retrieve next SAN data
         customer, csvPath, shName, sanName, shYear = tbl_options.custData
         shName, shFile, sanName, csvPath = san
+        #shName: John_Morrison_170726_1640_Maiden_Prod
+        #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
+        
         #and store it for the slide creator function
         custData = (customer, csvPath, shName, sanName, shYear)
         tbl_options.custData = custData
