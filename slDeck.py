@@ -179,7 +179,7 @@ def createSlideDeck(tbl_options):
         
         #make and save slideDeck
         singleDeck(tbl_options)
-        print 'SAN', sanName
+        #print 'SAN', sanName
         logEntry('Slides Created', customer, shName)
         
     if len(tbl_options.sanList) > 1:
@@ -190,7 +190,7 @@ def createSlideDeck(tbl_options):
         tbl_options.custData = custData
 
         multiDeck(tbl_options)
-        print 'SAN', sanName
+        #print 'SAN', sanName
         logEntry('Slides Created', customer, 'Agregate')
 
 #--------------------------------------------------------------------
@@ -244,6 +244,8 @@ def saveDeck(tbl_options):
         print folder + shName, 'Kept Open'
         prs.save(folder + shName + '-'+ timestamp + '.pptx')
    
+
+
         
 #-----------------------------------------------------------------
 

@@ -37,7 +37,6 @@ def fill_dbTable(options):
     #get the number of columns to import from csv file
     #nColumns = len(options.csvColumns)
     nColumns = len(csvData[0])
-    print 'columns', nColumns
     
     #set the number of data values' placeholders (?, ?, ....?) based on the number of columns
     qmark = ','.join(['?'] * nColumns)
@@ -134,98 +133,6 @@ if __name__ == "__main__":
     conn = sql.connect(sqlite_file)
     c = conn.cursor()
     csv_to_db(c, options)
-
-
-
-
-    ###-----------------------------------------------------
-    ###-----------------------------------------------------
-    ## SQL TESTING
-    ###-----------------------------------------------------
-    ###-----------------------------------------------------
-
-    ###-----------------------------------------------------
-    ###-----------------------------------------------------
-    #THIS NEEDS TO GO INTO slLib.createSlideDeck 
-    ###-----------------------------------------------------
-    ###-----------------------------------------------------
-
-    #adding records
-
-    ###how many total ports does a given switch has?
-    ##c.execute("SELECT SUM(total_ports) FROM ports WHERE sw_name = 'nc-1412-f2-01'")
-    ###data = c.fetchall()
-    ##data = c.fetchone()
-    ##print data[0]
-
-
-    ###how many switches of a certain model are in fabric 1?
-    ##c.execute("SELECT COUNT(sw_name) FROM switches WHERE sw_model = 'DCX-8510-4' and sw_fabric = 'Maiden F1'")
-    ##data = c.fetchone()
-    ##print data[0]
-
-    ###List (SELECT) each type of switch (GROUP BY) and its number (COUNT)
-    ##c.execute('''
-    ##SELECT sw_model, COUNT(*)
-    ##FROM switches
-    ##GROUP BY sw_model
-    ##''')
-    ##data = c.fetchall()
-    ##print 'Number of switches of each model' , data
-
-
-    ###join two tables (INNER JOINT)
-    ###and list (SELECT) the swiches' names and model
-    ###for a given model AND fabric (WHERE)
-    ##c.execute('''
-    ##SELECT switches.sw_name, ports.total_ports
-    ##FROM switches
-    ##INNER JOIN ports
-    ##ON switches.sw_name=ports.sw_name
-    ##WHERE sw_model = 'DCX-8510-4' and sw_fabric = 'Maiden F1'
-    ##''')
-
-    ### the same but for just a given model (all fabrics)
-    ##c.execute('''
-    ##SELECT switches.sw_name, total_ports
-    ##FROM switches
-    ##INNER JOIN ports
-    ##ON switches.sw_name = ports.sw_name
-    ##WHERE sw_model = '5470'
-    ##''')
-    ##data = c.fetchall()
-    ##print 'switches\'s names and total ports for the given model' , data
-
-
-    #THIS IS NOT WORKING YET
-    #https://www.w3resource.com/sql/aggregate-functions/sum-and-count-using-variable.php
-
-    # the following statement  is using sql alias fields
-    #(not real table fields): sCount and pCount
-    # count and sum are grouped based on switch model
-
-    ##c.execute('''
-    ##SELECT switches.sw_model, switches.sCount, ports.pCount
-    ##FROM switches
-    ##INNER JOIN (
-    ##SELECT sw_model,COUNT(*) AS sCount,
-    ##SUM(total_ports) AS pCount
-    ##FROM
-    ##ON switches.sw_name=ports.sw_name
-    ##WHERE sw_model = 'DCX-8510-4' and sw_fabric = 'Maiden F1'
-    ##''')
-
-    ##c.execute('''
-    ##SELECT
-    ##    switches.sw_model,
-    ##    COUNT(switches.sw_name),
-    ##    SUM(ports.total_ports)
-    ##FROM
-    ##    switches
-    ##INNER JOIN ports ON switches.sw_name = ports.sw_name
-    ##GROUP BY
-    ##    switches.sw_model
-    ##''')
 
     c.execute('''
     SELECT

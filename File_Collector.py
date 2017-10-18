@@ -164,14 +164,12 @@ while True:
         #delete the csv directory to remove the used files
         initFolders()
 
-    #used only for the logs
+    #used only for the console loop counter
     end = timer()
     tTime = time.strftime("%X")
     tDate = time.strftime("%x")
     print tDate, tTime, 'Loop:', loopCount, '-', len(customers), 'Folders', '-', format(round(end-start, 1), '.1f'), 'Seconds'
 
-    #logData = ['Loop:', loopCount, '-', len(customers), 'Folders']
-    #logEntry(logData)
 
     if msvcrt.kbhit():
         #print 'KEY:', msvcrt.getch()

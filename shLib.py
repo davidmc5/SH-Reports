@@ -126,9 +126,6 @@ def archiveFiles(options):
     #retrieve SH report variables
     customer, csvPath, shName, sanName, shYear = options.custData
     
-    #print 'shName', shName
-    #print 'shFile', shFile
-    
     #remote folder
     folder = drive + startFolder + customer + shFolder
 
@@ -137,7 +134,7 @@ def archiveFiles(options):
     
     for san in options.sanList:
         shName, shFile, sanName, csvPath = san
-        print 'ARCHIVING', shFile
+        #print 'ARCHIVING', shFile
 
         if archv_opt != 'no_remote':
             #Verify if the remote archive directory already exists
@@ -457,26 +454,11 @@ def getCsvData(options):
     columns = options.csvColumns
     shData = [] #initialise a list to store each row-list
 
-    # delete this
-    #csvFiles = get_csvFiles()
-
-    #print options.csvPathList
-   
     csvTarget = options.csvFile + '.csv'
 
-    #print 'csvPath', options.csvPath
-    #print 'csvTarget', csvTarget
-
-#------------------------
-##    for csvPath in options.csvPathList:
-##        csvFile = csvPath + csvTarget
-#------------------------
-#------------------------
     for san in options.sanList:
         shName, shFile, sanName, csvPath = san
         csvFile = csvPath + csvTarget
-#------------------------
-        
       
         with open(csvFile, 'rb') as f:
             reader = csv.reader(f)
@@ -487,7 +469,6 @@ def getCsvData(options):
 
                 if rowIdx == 0:
                     # don't import the header row
-                    #print shRow
                     continue
                 
                 
@@ -502,28 +483,6 @@ def getCsvData(options):
 
                 shData.append(row)
     return shData
-
-##def getCsvData(options):
-##    #getCsvData extracts the specified columns from the csv file
-##    #the columns are a list of strings with the csv column letter identifier:
-##    #example: columns = ['a', 'c', 'd', 'l', 'm']
-##    #it returns a list of row-lists (one list per row) in that column order
-##
-##    csvFile = options.csvPath + options.csvFile + '.csv'
-##    columns = options.csvColumns
-##    shData = [] #initialise a list to store each row-list
-##    
-##    with open(csvFile, 'rb') as f:
-##        reader = csv.reader(f)
-##
-##        for shRow in reader:
-##            if len(shRow) == 0: break
-##            row=[]
-##            for col in columns:
-##                row.append(shRow[col2num(col)-1])
-##            #print row
-##            shData.append(row)
-##    return shData
 
 
 #================================================================

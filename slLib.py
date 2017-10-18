@@ -321,4 +321,51 @@ def move_slide(presentation, old_index, new_index):
         xml_slides.insert(new_index, slides[old_index])
 
 
+def textSlide(presentation, title, subtitle, text, **opts):
+    '''
+    Creates a slide with a title, a subtitle and 
+    multiple rows of text with options for text color 
+    and textbox placement and size.
+    **opts examples:
+    
+    #text Color (R, G, B)
+    txt_color = (138,43,226)
+    
+    #text box (left, top, width, height)
+    txt_box = (1.5, 2.75, 10, 3.5) 
+    '''
+    
+    #default text color (138,43,226) # blueviolet
+    txt_color = opts.get("txt_color", (138,43,226) )
+    #textbox(left, top, width, height)
+    #default txt_box = (1.5, 2.75, 10, 3.5)
+    txt_box = opts.get("txt_box", (1.5, 2.75, 10, 3.5) )
+    
+    textbox =[]
+    for par in txt_box:
+        textbox.append(Inches(par))
+
+    prs = presentation
+    
+    title_slide_layout = prs.slide_layouts[1]
+    slide = prs.slides.add_slide(title_slide_layout)
+    slide_title = slide.shapes.title
+    slide_subtitle = slide.placeholders[1]
+    slide_title.text = title
+    slide_subtitle.text = subtitle
+    
+    #add_textbox(left, top, width, height)
+    shape = slide.shapes
+    
+    #txtBox = shape.add_textbox(Inches(1.5),Inches(2.75), Inches(10), Inches(3.5))
+    txtBox = shape.add_textbox(*textbox)
+    
+    font_size = fSize(len(text))
+    #fSize = 17
+    txtBox.text_frame.paragraphs[0].font.size = Pt(font_size)
+    #txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(138,43,226) # blueviolet
+    txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(*txt_color) # blueviolet
+    #Add new-line characters (\n) between each text element        
+    paragraph = '\n'.join(text)
+    txtBox.text = paragraph
 
