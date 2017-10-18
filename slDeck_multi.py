@@ -2,6 +2,30 @@ from slLib import *
 import slDeck
 from sqlLib import *
 
+
+def textSlide(presentation, title, subtitle, text, opt=None):
+    prs = presentation
+    
+    title_slide_layout = prs.slide_layouts[1]
+    slide = prs.slides.add_slide(title_slide_layout)
+    slide_title = slide.shapes.title
+    slide_subtitle = slide.placeholders[1]
+    slide_title.text = title
+    slide_subtitle.text = subtitle
+    
+    #add_textbox(left, top, width, height)
+    shape = slide.shapes
+    txtBox = shape.add_textbox(Inches(1.5),Inches(2.75), Inches(10), Inches(3.5))
+    
+    font_size = fSize(len(text))
+    #fSize = 17
+    txtBox.text_frame.paragraphs[0].font.size = Pt(font_size)
+    txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(138,43,226) # blueviolet
+    #Add new-line characters (\n) between each text element        
+    paragraph = '\n'.join(text)
+    txtBox.text = paragraph
+
+
 def multiDeck(tbl_options):
     ''' Creates a slide deck with the agreagated data from all
     the reports downloaded'''
@@ -46,26 +70,16 @@ def multiDeck(tbl_options):
     ##SLIDE: SAN Health Combined Report
     # Slide to show the SH reports used in the agregate.
     
-    title_slide_layout = prs.slide_layouts[1]
-    slide = prs.slides.add_slide(title_slide_layout)
-    title = slide.shapes.title
-    subtitle = slide.placeholders[1]
-    title.text = "SAN Health Combined Report"
-    subtitle.text = customer + ' - Reports Included:'
-    
-    #add_textbox(left, top, width, height)
-    shape = slide.shapes
-    txtBox = shape.add_textbox(Inches(1.5),Inches(3), Inches(10), Inches(3.5))
-    txtBox.text_frame.paragraphs[0].font.size = Pt(20)
-    txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(0,0,0) # black
     #place all the report file names in a list
     names = []
     for san in tbl_options.sanList:
         names.append(san[0])
-    #Add new line characters between each report name        
-    paragraph = '\n'.join(names)
-    txtBox.text = paragraph
-            
+    count = len(names)
+    title = "SAN Health Combined Report"
+    subtitle = customer + ' - Reports Included (' + str(count) + '):'  
+      
+    textSlide(prs, title, subtitle, names)
+                
 #--------------------------------------------------------------------
 
     #SLIDE: FABRIC SUMMARY TABLE

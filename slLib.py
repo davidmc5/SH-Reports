@@ -53,6 +53,47 @@ class Table_Options:
         #font.color.theme_color = MSO_THEME_COLOR.ACCENT_1
 
 
+def fSize(numLines, maxFsize=20):    
+    '''returns the font size in points (integer between 10-20)
+        for the given number of lines up to the maxFSize'''
+        
+    if numLines < 12:
+        font_size = 20
+        
+    elif numLines < 13:
+        font_size = 19
+        
+    elif numLines < 14:
+        font_size = 18
+        
+    elif numLines < 15:
+        font_size = 17
+        
+    elif numLines < 16:
+        font_size = 16
+        
+    elif numLines < 19:
+        font_size = 15
+        
+    elif numLines < 20:
+        font_size = 14
+        
+    elif numLines < 22:
+        font_size = 13
+         
+    elif numLines < 24:
+        font_size = 12
+        
+    elif numLines < 26:
+        font_size = 11
+        
+    else:
+        font_size = 10
+        
+    if font_size > maxFsize:
+        font_size = maxFsize
+    return font_size
+
     
 
 def format_table(table, options):
@@ -190,37 +231,10 @@ def create_table(slide, data, options):
         #table.columns[col].width = ( Pt(12)+ Pt(12 * maxLen[col] * 0.65) )
         #table.columns[col].width = ( Pt(10)+ Pt(10 * maxLen[col] * 0.70) )
 
-    #Format table
-
-    #num_rows = len(data)
-    
-    if rows < 14:
-        options.font_size = Pt(18)
-        
-    elif rows < 15:
-        options.font_size = Pt(17)
-        
-    elif rows < 16:
-        options.font_size = Pt(16)
-        
-    elif rows < 19:
-        options.font_size = Pt(15)
-        
-    elif rows < 20:
-        options.font_size = Pt(14)
-        
-    elif rows < 22:
-        options.font_size = Pt(13)
-         
-    elif rows < 24:
-        options.font_size = Pt(12)
-        
-    elif rows < 26:
-        options.font_size = Pt(11)
-        
-    else:
-        options.font_size = Pt(10)
-
+    #format font size based on the number of lines
+    #limit font size to a max of 18pt. Tables with few rows look better
+    font_size = fSize(rows, 18)
+    options.font_size = Pt(font_size)
        
     format_table(table, options)
     return table
