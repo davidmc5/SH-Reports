@@ -54,8 +54,10 @@ class Table_Options:
 
 
 def fSize(numLines, maxFsize=20):    
-    '''returns the font size in points (integer between 10-20)
-        for the given number of lines up to the maxFSize'''
+    '''
+    Returns the font size in points (an integer between 10-20)
+        for the given number of lines, up to the maxFSize
+    '''
         
     if numLines < 12:
         font_size = 20
@@ -139,7 +141,8 @@ def format_table(table, options):
 def create_table(slide, data, options):
     title = options.title
     subtitle = options.subtitle
-    width = Inches(10) #total width of table
+    #width = Inches(10) #total width of table
+    width = Inches(1) #total width of table
     height = Inches(.1) #total height of table
     left = options.left
     top = options.top
@@ -187,59 +190,92 @@ def create_table(slide, data, options):
     #table.columns[1].width = Inches(1.0)
 
 
-    #Adjust column widths based on max width of all cells in a column
+    #Adjust column widths based on max word length from all cells in a column
+    
+    #CHANGE THIS!!!
+    #NEED TO FIRST STORE A 
     maxLen = []
     for row in xrange(len(data)):
-        for cel, value in enumerate(data[row]):
-
-            #check to use only the largest string space-separated segment
-            #This is because powerpoint will break the header row (containing spaces)
-            #into two lines
-
-            #For header row only, split words into multiple lines
+        if len(data[row]) == 1:
+            #divider header / single merged cell-- do not use for width calculation
+            continue
+        for col, value in enumerate(data[row]):
+            #For the header column only, row == 0, 
+            #break each string into space-separated words 
+            #to find the longest word in the string.
+            #Powerpoint will automatically break strings in cells 
+            #into mutiple lines using the spaces (if any), 
+            #if the cell is not wide enough.
             if row == 0:
                 value = str(value)
-                #For header row only, split words into multiple lines
+                #For header row only, break the string into separate words
+                #to measure their length individually. 
                 words = value.split(' ')
             else:
-                #For the rest of rows, display the table cell as a single line string
+                #For the rest of rows, make the column wide enough
+                #to display the cell text on a single line
                 words = [value]
             
+            #find the longest word in the list
             for word in words:                    
                 txtLen = len(str(word))
                 try:
-                    if txtLen > maxLen[cel]:
-                        maxLen[cel] = txtLen
+                    if txtLen > maxLen[col]:
+                        maxLen[col] = txtLen
                 except:
                     #maxLen[] is an empty list on first pass (header row) 
                     maxLen.append(txtLen)
 
-
-
-    #<<<----------------------------
-    # TO-DO: AUTO-ADJUST THE CORRECTION FACTOR FOR EACH POINT SIZE
-    # BETWEEN 10 AND 18 points
-    # PROBABLY NON-LINEAR
-    #<<<----------------------------
-    
-    #for each column, set the width BASED ON THE MAX LENGHT OF THE DATA STRING
-    #the number of columns is the len() of any row. Using first row, data[0].
-    for col in xrange(len(data[0])):
-        #Adjust column width to max length of text
-        #table.columns[col].width = ( Pt(20)+ Pt(20 * maxLen[col] * 0.55) ) 
-        table.columns[col].width = ( Pt(18)+ Pt(18 * maxLen[col] * 0.60) )
-        #table.columns[col].width = ( Pt(12)+ Pt(12 * maxLen[col] * 0.65) )
-        #table.columns[col].width = ( Pt(10)+ Pt(10 * maxLen[col] * 0.70) )
-
     #format font size based on the number of lines
-    #limit font size to a max of 18pt. Tables with few rows look better
+    #Optional max font size limt of 18pt: Tables with few rows look better.
     font_size = fSize(rows, 18)
+
+
+    #---------------------------------
+    #---------------------------------
+    #FOR TESTING
+    #font_size = 20
+    #---------------------------------
+    #---------------------------------
+
+
+    
     options.font_size = Pt(font_size)
+
+
+    #for each column, set the width BASED ON THE MAX LENGHT DATA STRING
+    #the number of columns is the len() of any row. Using just first row, data[0].
+    for col in xrange(len(data[0])):
+        table.columns[col].width = colWidth(maxLen[col], font_size)
+        
+    # Manually set specific columns' widths
+    #(if omited, all columns are equally sized)
+    #table.columns[0].width = Inches(0)
+    #table.columns[1].width = Inches(1.0)
+
        
     format_table(table, options)
     return table
 ##------------------------------------------------------------------------------------^^^^^^^^^
 
+def colWidth(max_word_length, font_size):
+    '''
+    Returns the column width based on the given length of the longest word
+    and the font size in Pt.
+    '''
+        #Find the correction FACTOR
+    if font_size > 19:
+        weight = 0.57
+    elif font_size > 18:
+        weight = 0.55
+    elif font_size > 12:
+        weight = 0.60
+    elif font_size > 11:
+        weight = 0.65
+    else: weight = 0.70
+    
+    
+    return (Pt( font_size + font_size * max_word_length * weight ) )
 
 
 

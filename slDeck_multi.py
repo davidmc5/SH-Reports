@@ -93,13 +93,14 @@ def multiDeck(tbl_options):
 
     data = c.fetchall()
     #format data with group headers (remove the group = first column data)
-    data = groupHeader(data)
+    #data = groupHeader(data)
 
     
     #Add column headers to print on the slide table
     # this is a tuple with the column names
     # as the very first record of the 'data' list
-    headers = [('Switch Model',
+    headers = [('Fabric',
+                'Switch Model',
                 'Total Switches',
                 'Total Ports',
                 'Unlicensed Ports',
@@ -206,7 +207,7 @@ def multiDeck(tbl_options):
     data = c.fetchall()
     
     #format data with group headers (remove the group = first column data)
-    data = groupHeader(data)
+    #data = groupHeader(data)
 
     
     #Add column headers to print on the slide table
@@ -214,7 +215,8 @@ def multiDeck(tbl_options):
     # as the very first record of the 'data' list
     # first column for 'fabric' will be printed on a single dividing row
     
-    headers = [('Switch Model',
+    headers = [('Fabric',
+                'Switch Model',
                 'Total Switches',
                 'Firmware',
                 'Switch Status',
