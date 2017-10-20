@@ -47,6 +47,26 @@ and typing in python scriptname.py in the console.
 # (maybe the next time around things would have settled!)
 
 # -----------------------------------------------------------------
+# -----------------------------------------------------------------
+#determine server environment (lab or production)
+if os.path.isdir(lab_path[3]):
+    print lab_path[3]
+    location = lab_path
+    
+if os.path.isdir(prod_path[3]):
+    print prod_path[3]
+    location = prod_path
+
+#set paths based on server environment
+drive,\
+startFolder,\
+shFolder,\
+localWorkFolder,\
+slides_template_path,\
+csvLogFile,\
+tmpLogFile = location
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
 
 
 #make a start log entry

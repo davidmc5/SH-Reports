@@ -120,7 +120,7 @@ def singleDeck(tbl_options):
 
 #--------------------------------------------------------------------
 
-    #SLIDE: HANGING ZONES TABLE
+    #SLIDE: ZONING SUMMARY (Hanging Zones)
 
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = 'SAN: '+ sanName

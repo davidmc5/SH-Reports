@@ -24,6 +24,7 @@ import inspect
 
 # for all folder names and locations see shPaths
 from shPaths import *
+#import shPaths
 
 from itertools import islice
 
@@ -42,6 +43,7 @@ from itertools import islice
 blank_slide_layout_index = 7
 
 
+    
 def logEntry(*logData):
     ''' Used to create a timestamped log entry into a csv log file'''
     
