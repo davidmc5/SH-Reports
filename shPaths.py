@@ -13,15 +13,17 @@ localWorkFolder = 'C:/users/dmartin/Desktop/SH-Project/'
 slides_template_path = localWorkFolder + 'CODE/'
 csvLogFile = localWorkFolder + 'shLog.csv'
 tmpLogFile = localWorkFolder + 'shLogTemp.csv'
+#---common
+collectorFolder =  localWorkFolder + 'Downloads/'
+csvTempFolder = collectorFolder + 'csvTemp/'
+archiveFolder = collectorFolder + 'ARCHIVE/'
 
 prod_path = (
-    drive, 
-    startFolder, 
-    shFolder, 
+    drive, startFolder, shFolder, 
     localWorkFolder, 
     slides_template_path,
-    csvLogFile,
-    tmpLogFile)
+    csvLogFile, tmpLogFile,
+    collectorFolder, csvTempFolder, archiveFolder)
 
 
 #---------------------------------------------------
@@ -38,21 +40,24 @@ slides_template_path = localWorkFolder + 'shTemplate.pptx'
 #log files
 csvLogFile = localWorkFolder + 'shLog.csv'
 tmpLogFile = localWorkFolder + 'shLogTemp.csv'
-
-lab_path = (
-    drive, 
-    startFolder, 
-    shFolder, 
-    localWorkFolder, 
-    slides_template_path,
-    csvLogFile,
-    tmpLogFile)
-#---------------------------------------------------
-#<------------- COMMON
-#---------------------------------------------------
+#----common
 collectorFolder =  localWorkFolder + 'Downloads/'
 csvTempFolder = collectorFolder + 'csvTemp/'
 archiveFolder = collectorFolder + 'ARCHIVE/'
+
+lab_path = (
+    drive, startFolder, shFolder, 
+    localWorkFolder, 
+    slides_template_path,
+    csvLogFile, tmpLogFile,
+    collectorFolder, csvTempFolder, archiveFolder)
+#---------------------------------------------------
+#<------------- COMMON
+#---------------------------------------------------
+# collectorFolder =  localWorkFolder + 'Downloads/'
+# csvTempFolder = collectorFolder + 'csvTemp/'
+# archiveFolder = collectorFolder + 'ARCHIVE/'
+
 # zip file inside the SH ZIP that contains the CSV files
 csvZipFileName = '_CSVReports.zip'
 

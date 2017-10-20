@@ -64,7 +64,8 @@ shFolder,\
 localWorkFolder,\
 slides_template_path,\
 csvLogFile,\
-tmpLogFile = location
+tmpLogFile,\
+collectorFolder, csvTempFolder, archiveFolder = location
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
