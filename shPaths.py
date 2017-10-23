@@ -18,7 +18,7 @@ def prod_path():
     shFolder = '/SAN Health/'
     #LOCAL SERVER
     localWorkFolder = 'C:/users/dmartin/Desktop/SH-Project/'
-    slides_template_path = localWorkFolder + 'CODE/'
+    slides_template_path = localWorkFolder + 'CODE/' + 'shTemplate.pptx'
     csvLogFile = localWorkFolder + 'shLog.csv'
     tmpLogFile = localWorkFolder + 'shLogTemp.csv'
     #---common

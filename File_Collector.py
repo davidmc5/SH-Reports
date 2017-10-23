@@ -85,8 +85,11 @@ while True:
         #And start a new loop
         continue
 
-    for customer in customers:
 
+#-------------------------------------------------------
+#PUT THIS SECTION INTO A FUNCTION: GET LIST OF REPORTS WITH VALID CSVS
+    for customer in customers:
+        time.sleep(1)
         #clear the csvPath and san lists
         options.csvPathList = []
         options.sanList = []
@@ -103,6 +106,9 @@ while True:
         #Look inside each ZIP file for another ZIP with the CSV files
         
         for shFile in get_shFiles():
+            #print 'shFile', shFile
+            
+            options.custData = None
                                     
             data = extract_csvFiles(shFile)
             if data == None:
@@ -137,29 +143,28 @@ while True:
             #place this in a config file!
             options.archv_opt = 'no_remote'
 
-        # Store the list of all the SH.ZIP file names processed for this customer
-        #options.shFiles = shFileNames    
+#-------------------------------------------------------
+        # CHECK IF THERE ARE ANY VALID SH REPORTS (WITH CSV FILES)
+        # FOR THIS CUSTOMER. IF NOT, GO TO NEXT CUSTOMER
+        # OTHERWISE, GO TO NEXT CUSTOMER.
 
         # ------------------------------------------
         # populate the database
         # from all the CSV files from all the SH reports in the folder
         # Remove this function from slDeck.py?
+        if options.custData == None:
+            #no reports with valid csv files for this customer.
+            #go to next customer.
+            continue
         
         #Open the database and load one table per csv file
         loadDbTables(options)
-
-        #quit()
-        
         #create Slide Deck(s) 
         createSlideDeck(options)
-
         #Archive only the local SH Zip files ('no_remote')
         #to avoid excesive storage usage.
         #archiveFiles(shFile, custData, 'no_remote')
         archiveFiles(options)
-
-        #logEntry('Slides Created', customer, shName)
-        
         #delete the csv directory to remove the used files
         initFolders()
 

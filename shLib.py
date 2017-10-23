@@ -114,9 +114,9 @@ def initFolders():
             if item.endswith(".zip"):
                 os.remove(join(collectorFolder, item))
     except:
-        logEntry('File Move Error', collectorFolder, item, 'Waiting 30 sec')
+        logEntry('InitFolders - File Move Error', collectorFolder, item, 'Waiting 5 sec')
         #wait for the OS to close the files        
-        time.sleep(30)
+        time.sleep(5)
 
 
 
@@ -201,20 +201,13 @@ def archiveBad(customer, shFile):
             endFile = folder + 'TEMP/' + shFile
             shutil.move(startFile, endFile)
         except:
-            logEntry('File Move Error', startFile, 'Waiting 30 sec')
-            time.sleep(30)
+            logEntry('Bad File -- Archive Error', startFile, 'Waiting 5 sec')
+            time.sleep(5)
             #Problem moving remote bad file to archive'
 ##            if startFile not in blacklist:
 ##                blacklist.append(startFile)
 ##                logEntry('Can\'t Move File', startFile)
 ##                print blacklist
-
-#--------------------------------------------
-#--------------------------------------------
-    #print 'BAD FILE:', startFile
-
-#--------------------------------------------
-#--------------------------------------------
 
     #local zip file
     #Verify it exists or create a directory to archive the local copy of SH Files
@@ -267,7 +260,6 @@ def getZipFiles(customer):
             if zipCount == 0:
                 return None
 
-
         #Users can be uploading multiple files in a single customer folder.
         # Wait until the number of files in the folder is not incrementing,
         # to avoid downloading an incomplete number of files,
@@ -289,7 +281,6 @@ def getZipFiles(customer):
                 #The number of files uploaded is stable. Retrieve them.
                 #print lastCount
                 break
-
 
         #there are some files...
         #download just the zip files (if any)
@@ -316,14 +307,14 @@ def getZipFiles(customer):
                 #that is not yet ready, and get it corrupt.
                 #find a better way of doing this.
                 #time.sleep(1)
+                
                 shutil.copyfile(src, dst)
                
             #print eachFile
     except:
     
         #PROBLEM RETRIEVING ZIP FILES!
-        logEntry('File Error', 'Can\'t Retrieve Files From', folder)
-        
+        logEntry('File Error', 'Can\'t Retrieve Files From', folder)        
         #Probably the file is still being uploaded by user
         #skip until the next pass
         return None
@@ -408,8 +399,7 @@ def extract_csvFiles(shFile):
                     #determine if it is CSV ZIP file ends with the string
                     #referenced by csvZipFileName
                     if compFile.endswith(csvZipFileName):
-                        #print compFile
-                      
+                        #print 'CSV ZIP:', compFile                      
                         #extract the CSV ZIP file from the SH ZIP
                         #...into the local csv collector folder
                         file_zip.extract(compFile, csvTempFolder)
