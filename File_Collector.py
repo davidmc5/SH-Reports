@@ -89,7 +89,6 @@ while True:
 #-------------------------------------------------------
 #PUT THIS SECTION INTO A FUNCTION: GET LIST OF REPORTS WITH VALID CSVS
     for customer in customers:
-        time.sleep(1)
         #clear the csvPath and san lists
         options.csvPathList = []
         options.sanList = []
