@@ -16,14 +16,11 @@ class Table_Options:
 
         self.custData = None
         self.archv_opt = None
+        
+        self.sanList = [] # the list of SAN names and csvPath of retrieved csv files
 
-        #self.shFiles = None #list with complete SH report.ZIP file names (minus the path)
-
-        #self.csvPathList = None # a list of csvPath from file colector loop
-        self.sanList = None # the list of SAN names and csvPath of retrieved csv files
-
-        self.csvFile = None
-        self.csvColumns = []
+        self.csvFile = None # current csv file name to extract data from
+        self.csvColumns = [] # current csv  columns (letters) to extract
 
         self.dbConnection = None # db Connection handler: conn = sql.connect(sqlite_file)
         self.dbTableName = None #name of the db table to create

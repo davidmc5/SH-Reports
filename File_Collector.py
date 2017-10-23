@@ -48,38 +48,16 @@ and typing in python scriptname.py in the console.
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-#determine server environment (lab or production)
-if os.path.isdir(lab_path[3]):
-    print lab_path[3]
-    location = lab_path
-    
-if os.path.isdir(prod_path[3]):
-    print prod_path[3]
-    location = prod_path
-
-#set paths based on server environment
-drive,\
-startFolder,\
-shFolder,\
-localWorkFolder,\
-slides_template_path,\
-csvLogFile,\
-tmpLogFile,\
-collectorFolder, csvTempFolder, archiveFolder = location
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-
+#initialize table's default options
+options = Table_Options()
 
 #make a start log entry
-logEntry("Started")
+logEntry("Started", siteEnv)
 
 #delete any old files in collector folder
 initFolders()
 
 loopCount = 0
-
-#initialize table's default options
-options = Table_Options()
 
 ###this is for shLib\archiveBad but it is not working.
 ##global blacklist

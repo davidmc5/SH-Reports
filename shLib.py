@@ -56,7 +56,6 @@ def logEntry(*logData):
         logFields.append(arg)
         
     #logFields.extend(logData.split(','))
-    
     try:
         with open(csvLogFile, 'a') as logFile:
             logWriter = csv.writer(logFile)
@@ -452,7 +451,6 @@ def getCsvData(options):
     #it returns a list of row-lists (one list per row) in that column order
 
 
-    #csvFile = options.csvPath + options.csvFile + '.csv'
     columns = options.csvColumns
     shData = [] #initialise a list to store each row-list
 
