@@ -107,16 +107,20 @@ def initFolders():
     #Therefore, the file deletion does not occur until the last handle to the file is closed.
     #Subsequent calls to CreateFile to open the file fail with ERROR_ACCESS_DENIED.
     shutil.rmtree(csvTempFolder, ignore_errors=True)
+    #delay after folder deletion so it does not log an exception with next block.
+    time.sleep(1)
 
-    #delete any old zip files from collector folder
+    #delete all files from collector folder
     try:
-        for item in os.listdir(collectorFolder):
-            if item.endswith(".zip"):
-                os.remove(join(collectorFolder, item))
+        #add path names to the files in listdir for os.path.isdir check to work
+        for item in [os.path.join(collectorFolder, f) for f in os.listdir(collectorFolder)]:
+            if not os.path.isdir(item):
+                os.remove(item)
     except:
         logEntry('InitFolders - File Move Error', collectorFolder, item, 'Waiting 5 sec')
-        #wait for the OS to close the files        
+        #wait for the OS to close files        
         time.sleep(5)
+
 
 
 
