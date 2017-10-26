@@ -7,6 +7,7 @@
 # ...Use the REST API.
 # Nevermind... we are switching to Google drive / Box (see Box python module)
 
+import msvcrt
 import time
 from timeit import default_timer as timer
 
@@ -15,11 +16,10 @@ from timeit import default_timer as timer
 #(or in the pyhton path)
 from shLib import *
 #from slDeck import createSlideDeck
-from slDeck import createSlideDeck
+#from slLib import createSlideDeck
 from slDeck import loadDbTables
+from slLib import Table_Options, createSlideDeck
 
-from slLib import Table_Options
-import msvcrt
 
 '''
 On windows, it's the CMD console that closes,
@@ -160,11 +160,16 @@ while True:
         loadDbTables(options)
         #create Slide Deck(s) 
         createSlideDeck(options)
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+        quit()
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+        
         #Archive only the local SH Zip files ('no_remote')
         #to avoid excesive storage usage.
         #archiveFiles(shFile, custData, 'no_remote')
         archiveFiles(options)
         #delete the csv directory to remove the used files
+        #and delete all files from the collector folder
         initFolders()
 
     #used only for the console loop counter

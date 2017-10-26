@@ -1,5 +1,5 @@
 from slLib import *
-import slDeck
+#import slDeck
 from sqlLib import *
 
 def singleDeck(tbl_options):
@@ -115,7 +115,7 @@ def singleDeck(tbl_options):
 
     headers.extend(data)
     data = headers
-    create_single_table_db(data, tbl_options)
+    slLib.create_single_table_db(data, tbl_options)
 
 
 #--------------------------------------------------------------------
@@ -146,7 +146,7 @@ def singleDeck(tbl_options):
     data = c.fetchall()
     
     #covert data on 'dbUsed' column from Bytes to MB
-    data = slDeck.formatDbUsed(data)
+    data = formatDbUsed(data)
 
     #reformat dbUsed data
     
@@ -253,6 +253,6 @@ def singleDeck(tbl_options):
 #--------------------------------------------------------------------
 #--------------------------------------------------------------------
     # END OF SLIDES
-    slDeck.saveDeck(tbl_options)
+    saveDeck(tbl_options)
 #--------------------------------------------------------------------
 #--------------------------------------------------------------------

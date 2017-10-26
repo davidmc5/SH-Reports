@@ -6,6 +6,7 @@ from shLib import getCsvData
 #from shPaths import *
 #from slLib import Table_Options
 
+#SHOULD THIS ASSIGNEMENT BE IN SHPATH.PY?
 #sqlite_file = ':memory'   # No file. Put the database on RAM
 sqlite_file = 'shDB.db'    # name of the sqlite database file
 
