@@ -17,8 +17,8 @@ from timeit import default_timer as timer
 from shLib import *
 #from slDeck import createSlideDeck
 #from slLib import createSlideDeck
-from slDeck import loadDbTables
-from slLib import Table_Options, createSlideDeck
+from slDeck import loadDbTables, createSlideDeck
+from slLib import Table_Options
 
 
 '''
@@ -161,7 +161,7 @@ while True:
         #create Slide Deck(s) 
         createSlideDeck(options)
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
-        quit()
+        #quit()
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
         
         #Archive only the local SH Zip files ('no_remote')

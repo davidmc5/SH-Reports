@@ -449,6 +449,9 @@ def getCsvData(options):
     shData = [] #initialise a list to store each row-list
 
     csvTarget = options.csvFile + '.csv'
+    
+    #uncomment next to find out which csv file is the problem.
+    #print 'TARGET', csvTarget
 
     for san in options.sanList:
         shName, shFile, sanName, csvPath = san
@@ -458,23 +461,29 @@ def getCsvData(options):
             reader = csv.reader(f)
 
             for rowIdx, shRow in enumerate(reader):
+                numDataCols = len(shRow)
                 #stop reading when we reach the end
-                if len(shRow) == 0: break
-
-                if rowIdx == 0:
-                    # don't import the header row
-                    continue
-                
-                
-                #append each row data to a list
+                if len(shRow) == 0: break 
+                #don't import the header row
+                if rowIdx == 0:continue
+                    
+                                    
+                #append each row of data to a list
                 row=[]
-                
-                row.append(sanName)
-                
-                #grab only the columns requested
-                for col in columns:
-                    row.append(shRow[col2num(col)-1]) #column index start at 1
-
+                #first put the SAN name on first column
+                #this is needed when processing multiple reports (SANs)
+                row.append(sanName)  
+                              
+                #grab only the columns requested from the csv file
+                try:
+                    for col in columns:
+                        row.append(shRow[col2num(col)-1]) #column index starts at 1
+                except:
+                    #csv row is missing columns 
+                    #Probably fields not applicable to that specific Device.
+                    #skip this row
+                    print '.',
+                    continue
                 shData.append(row)
     return shData
 

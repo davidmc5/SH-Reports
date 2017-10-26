@@ -115,7 +115,7 @@ def singleDeck(tbl_options):
 
     headers.extend(data)
     data = headers
-    slLib.create_single_table_db(data, tbl_options)
+    create_single_table_db(data, tbl_options)
 
 
 #--------------------------------------------------------------------
