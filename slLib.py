@@ -65,6 +65,7 @@ def formatDbUsed(data):
     newData = []
     #grab the dbUse value
     for row in data:
+        row = tuple(row)
         #Example: (row[6] = 11.7% of 1045274B)
         #Example: (row[6] = 11% of 1045274B)
         # extract 1045274B and convert to 1.0MB
@@ -201,7 +202,10 @@ def create_table(slide, data, options):
     left = options.left
     top = options.top
     rows = len(data)
-    cols = len(data[0])
+    # the first row --data[0]-- should always be the headers (see slides) 
+    # (i.e., exact number of columns)
+    #note that other rows might be group headers with only one column!
+    cols = len(data[0]) 
 
     #create table
     shapes = slide.shapes
@@ -217,15 +221,21 @@ def create_table(slide, data, options):
     table = shapes.add_table(rows, cols, left, top, width, height).table
 
     #input data to table's cells
-    for row_idx,row in enumerate(data):
-        count = 0 #count the numner of non-empty cells
-        for col_idx, cell in enumerate(row):
-            table.cell(row_idx, col_idx).text = str(cell)
-            if cell != None: count += 1
-
+    try:
+        for row_idx,row in enumerate(data):
+            count = 0 #count the numner of non-empty cells
+            for col_idx, cell in enumerate(row):
+                table.cell(row_idx, col_idx).text = str(cell)
+                if cell != None: count += 1
+    except:
+        print 'SLIDE ERROR!: Data columns exceed number of headers (slLib/create_table)'
+        print 'Slide:', title, ' - Headers:', len(data[0]), data[0], 'Columns:', len(row), 'Row', row_idx+1
+        print 'Quiting' 
+        quit()
+        
         #Merge group row cells
-
-        #Check if all row cells are empty (optionally except the first) = GROUP HEADER ROW
+        #Detect GROUP HEADER ROW
+        #Check if all row cells (i.e., columns) are empty (optionally except the first)
         if count <= 1: # header row
             #mergeCellsHorizontally(table, row_idx, start_col_idx, end_col_idx)
             mergeCellsHorizontally(table, row_idx, 0, cols-1)
@@ -459,6 +469,23 @@ def textSlide(presentation, title, subtitle, text, **opts):
     paragraph = '\n'.join(text)
     txtBox.text = paragraph
 
+
+#--------------------------------------------------------------------
+def addHeaders(headers, data):    
+    '''
+    Add column headers to print on the slide table
+    'Headers' is a tuple with the column names added on 
+    the very first record of the 'data' list
+    '''
+    if len(headers[0]) != len(data[0]):
+        print 'SLIDE ERROR!: Mismatch between number of data columns and headers (slLib/addHeaders)'
+        print 'Headers:', len(headers[0]), headers[0], ', Columns:', len(data[0])
+        print 'Quiting' 
+        quit()
+
+    headers.extend(data)
+    data = headers
+    return data
 
 #--------------------------------------------------------------------
 def saveDeck(tbl_options):

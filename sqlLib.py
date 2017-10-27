@@ -96,6 +96,7 @@ def groupHeader(data):
     group = None
 
     for row in data:
+        row = tuple(row)
         if row[0] != group:
             group = row[0]
             #insert the group name as a single row

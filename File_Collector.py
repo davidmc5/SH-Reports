@@ -20,7 +20,10 @@ from shLib import *
 from slDeck import loadDbTables, createSlideDeck
 from slLib import Table_Options
 
-
+#stop script to test slide design
+#set to False for production
+#slideDesign = True
+slideDesign = False
 '''
 On windows, it's the CMD console that closes,
 because the Python process exits at the end.
@@ -160,8 +163,14 @@ while True:
         loadDbTables(options)
         #create Slide Deck(s) 
         createSlideDeck(options)
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
-        #quit()
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #To test slide design. 
+        #Stop after slides creation but before deleting SH reports.
+        if slideDesign:
+            print ''
+            print '------------------------'
+            print 'Stopping to check slides'
+            quit()
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
         
         #Archive only the local SH Zip files ('no_remote')

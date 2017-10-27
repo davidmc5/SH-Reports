@@ -228,59 +228,40 @@ def multiDeck(tbl_options):
 # 
 #     #SLIDE: PORT ERRORS
 # 
-#     tbl_options.title = 'Port Errors'
-#     tbl_options.subtitle = customer
-# 
-#     
-#     c.execute('''
-#     SELECT
-#         san,
-#         sw_name,
-#         slot_port,
-#         err_encInFrame,
-#         err_crc,
-#         err_shortFrame,
-#         err_longFrame,
-#         err_badEOF,
-#         err_encOutFrame,
-#         err_c3Discards,
-#         err_linkFailure,
-#         err_synchLost,
-#         err_sigLost,
-#         err_frameReject,
-#         err_frameBusy,
-#         avPerf,
-#         pkPerf,
-#         buffReserved,
-#         buffUsed
-# 
-# 
-#     FROM
-#         zones
-#     WHERE
-#         active_zoneCfg != 'N/A'
-#     ORDER BY
-#         sw_fabric
-#    ''')
-#     data = c.fetchall()
-#     
-#     #covert data on 'dbUsed' column from Bytes to MB
-#     data = formatDbUsed(data)
-# 
-#     #reformat dbUsed data
-#     
-#     #Add column headers to print on the slide table
-#     # this is a tuple with the column names
-#     # as the very first record of the 'data' list
-#     headers = [('SAN',
-#                 'Switch Name',
-#                 'Slot / Port',
-#                 'Error Type',
-#                 'Number of Errors')]
-# 
-#     headers.extend(data)
-#     data = headers
-#     create_single_table_db(data, tbl_options)
+    tbl_options.title = 'Port Errors'
+    tbl_options.subtitle = customer
+
+    
+    c.execute('''
+    SELECT
+        san,
+        sw_name,
+        slot_port,
+        COUNT(*)
+    FROM
+        PortErrorCnt
+    WHERE
+        err_c3Discards != 0
+
+    GROUP BY
+        san, sw_name, slot_port
+    ORDER BY
+        san
+   ''')
+    data = c.fetchall()
+    
+    #--------------------------------------------------------
+    #table headers
+    headers = [('SAN',
+                'Switch Name',
+                'Slot / Port',
+                'Num Errors')]
+    #Add table's headers row to data
+    data = addHeaders(headers, data)
+    #--------------------------------------------------------
+    
+    create_single_table_db(data, tbl_options)
+
 # 
 # #--------------------------------------------------------------------
 

@@ -53,6 +53,9 @@ def loadDbTables(tbl_options):
 
     # Open the database
     conn = sql.connect(sqlite_file)
+    #------------------------------
+    conn.row_factory = sql.Row
+    #-------------------------------
     tbl_options.dbConnection = conn
     c = conn.cursor()
 #---------------------------------
@@ -134,7 +137,7 @@ def loadDbTables(tbl_options):
 ##Import into dbtable:  PortErrorCounters.csv
     tbl_options.csvFile = 'PortErrorCounters'
     tbl_options.csvColumns = [
-        'a', 'g', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+        'a', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
         'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
 
     tbl_options.dbTableName = 'PortErrorCnt'
@@ -142,6 +145,8 @@ def loadDbTables(tbl_options):
     san TEXT,
     sw_name TEXT,
     slot_port TEXT,
+    tx_frames,
+    rx_frames,
     err_encInFrame TEXT,
     err_crc TEXT,
     err_shortFrame TEXT,
@@ -165,7 +170,7 @@ def loadDbTables(tbl_options):
 ##Import into dbtable:  PortErrorChanges.csv
     tbl_options.csvFile = 'PortErrorChanges'
     tbl_options.csvColumns = [
-        'a', 'g', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+        'a', 'g', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
         'r', 's', 't', 'u']
 
     tbl_options.dbTableName = 'PortErrorChg'
@@ -173,6 +178,8 @@ def loadDbTables(tbl_options):
     san TEXT,
     sw_name TEXT,
     slot_port TEXT,
+    tx_frames_chg,
+    rx_frames_chg,
     chg_encInFrame TEXT,
     chg_crc TEXT,
     chg_shortFrame TEXT,
