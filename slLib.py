@@ -477,6 +477,9 @@ def addHeaders(headers, data):
     'Headers' is a tuple with the column names added on 
     the very first record of the 'data' list
     '''
+    if len(data) == 0:
+        logData("No Slide Data!")
+        return None
     if len(headers[0]) != len(data[0]):
         print 'SLIDE ERROR!: Mismatch between number of data columns and headers (slLib/addHeaders)'
         print 'Headers:', len(headers[0]), headers[0], ', Columns:', len(data[0])

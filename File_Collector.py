@@ -20,10 +20,15 @@ from shLib import *
 from slDeck import loadDbTables, createSlideDeck
 from slLib import Table_Options
 
+#--------------------------------------------
 #stop script to test slide design
-#set to False for production
-#slideDesign = True
-slideDesign = False
+slideDesign = True
+#Uncomment next line for production
+#slideDesign = False
+#--------------------------------------------
+
+
+
 '''
 On windows, it's the CMD console that closes,
 because the Python process exits at the end.
