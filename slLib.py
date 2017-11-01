@@ -5,7 +5,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
 
 from shPaths import *
-from shLib import getCsvData
+from shLib import getCsvData, logEntry
 # from slDeck_single import singleDeck
 # from slDeck_multi import multiDeck
 # import slDeck_single as slSingle
@@ -31,6 +31,7 @@ class Table_Options:
 
         self.csvFile = None # current csv file name to extract data from
         self.csvColumns = [] # current csv  columns (letters) to extract
+        self.csvPivotCols = None
 
         self.dbConnection = None # db Connection handler: conn = sql.connect(sqlite_file)
         self.dbTableName = None #name of the db table to create
@@ -64,8 +65,8 @@ def formatDbUsed(data):
     #convert the bytes value into a MB to shorten the width of the column
     newData = []
     #grab the dbUse value
-    for row in data:
-        row = tuple(row)
+    for item in data:
+        row = tuple(item)
         #Example: (row[6] = 11.7% of 1045274B)
         #Example: (row[6] = 11% of 1045274B)
         # extract 1045274B and convert to 1.0MB
@@ -226,38 +227,33 @@ def create_table(slide, data, options):
             count = 0 #count the numner of non-empty cells
             for col_idx, cell in enumerate(row):
                 table.cell(row_idx, col_idx).text = str(cell)
-                if cell != None: count += 1
+                #count the number of columns in this row
+                #if just one column --> group header row
+                count += 1
+            #Merge group header cells for rows with just one element
+            #Check if all row cells (i.e., columns) are empty (optionally except the first)
+            if count == 1: # header row            
+                #mergeCellsHorizontally(table, row_idx, start_col_idx, end_col_idx)
+                mergeCellsHorizontally(table, row_idx, 0, cols-1)
+
+                #change row color
+                table.cell(row_idx, 0).fill.solid()
+                # set foreground (fill) color to a specific RGB color
+                #table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0xFB, 0x8F, 0x00) # Orange
+                #table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0x00, 0xFF, 0x00) #lima green
+                table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0x66, 0xFF, 0x66) #pastel green green
     except:
         print 'SLIDE ERROR!: Data columns exceed number of headers (slLib/create_table)'
         print 'Slide:', title, ' - Headers:', len(data[0]), data[0], 'Columns:', len(row), 'Row', row_idx+1
         print 'Quiting' 
         quit()
-        
-        #Merge group row cells
-        #Detect GROUP HEADER ROW
-        #Check if all row cells (i.e., columns) are empty (optionally except the first)
-        if count <= 1: # header row
-            #mergeCellsHorizontally(table, row_idx, start_col_idx, end_col_idx)
-            mergeCellsHorizontally(table, row_idx, 0, cols-1)
-
-            #change row color
-            table.cell(row_idx, 0).fill.solid()
-            # set foreground (fill) color to a specific RGB color
-            #table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0xFB, 0x8F, 0x00) # Orange
-            #table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0x00, 0xFF, 0x00) #lima green
-            table.cell(row_idx, 0).fill.fore_color.rgb = RGBColor(0x66, 0xFF, 0x66) #pastel green green
-
 
     # Manual way to set specific columns' widths
     #(if omited, all columns are equally sized)
     #table.columns[0].width = Inches(1.0)
     #table.columns[1].width = Inches(1.0)
 
-
     #Adjust column widths based on max word length from all cells in a column
-    
-    #CHANGE THIS!!!
-    #NEED TO FIRST STORE A 
     maxLen = []
     for row in xrange(len(data)):
         if len(data[row]) == 1:
@@ -478,7 +474,7 @@ def addHeaders(headers, data):
     the very first record of the 'data' list
     '''
     if len(data) == 0:
-        logData("No Slide Data!")
+        logEntry("No Slide Data!")
         return None
     if len(headers[0]) != len(data[0]):
         print 'SLIDE ERROR!: Mismatch between number of data columns and headers (slLib/addHeaders)'

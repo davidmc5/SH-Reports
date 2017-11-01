@@ -95,8 +95,8 @@ def groupHeader(data):
     #grab the first value for the group
     group = None
 
-    for row in data:
-        row = tuple(row)
+    for item in data:
+        row = tuple(item)
         if row[0] != group:
             group = row[0]
             #insert the group name as a single row

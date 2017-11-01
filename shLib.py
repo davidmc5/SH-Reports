@@ -434,16 +434,62 @@ def col2num(col):
     return num
 
 
-#----------------------------------------
-# modified this function to get ALL the csv files extracted
-# to the csvTemp directory, and adding the SAN name
-
+# #----------------------------------------------------------------------------
+## ORIGINAL BEFORE CHANGES TO PIVOT/TRANSPOSE THE ERROR COLUMNS INTO ROWS
+# def getCsvData(options):
+#     #getCsvData extracts the specified columns from the csv file
+#     #the columns are a list of strings with the csv column letter identifier:
+#     #example: columns = ['a', 'c', 'd', 'l', 'm']
+#     #it returns a list of row-lists (one list per row) in that column order
+# 
+#     columns = options.csvColumns
+#     shData = [] #initialise a list to store each row-list
+# 
+#     csvTarget = options.csvFile + '.csv'
+#     
+#     #uncomment next to find out which csv file is the problem.
+#     #print 'TARGET', csvTarget
+# 
+#     for san in options.sanList:
+#         shName, shFile, sanName, csvPath = san
+#         csvFile = csvPath + csvTarget
+#       
+#         with open(csvFile, 'rb') as f:
+#             reader = csv.reader(f)
+# 
+#             for rowIdx, shRow in enumerate(reader):
+#                 numDataCols = len(shRow)
+#                 #stop reading when we reach the end
+#                 if len(shRow) == 0: break 
+#                 #don't import the header row
+#                 if rowIdx == 0:continue
+#                                     
+#                 #append each row of data to a list
+#                 row=[]
+#                 #first put the SAN name on first column
+#                 #this is needed when processing multiple reports (SANs)
+#                 row.append(sanName)  
+#                               
+#                 #grab only the columns requested from the csv file
+#                 try:
+#                     for col in columns:
+#                         row.append(shRow[col2num(col)-1]) #column index starts at 1
+#                 except:
+#                     #csv row is missing columns 
+#                     #Probably fields not applicable to that specific Device.
+#                     #skip this row
+#                     print '.',
+#                     continue
+#                 shData.append(row)
+#     return shData
+# #----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+# CHANGES TO PIVOT/TRANSPOSE THE ERROR COLUMNS INTO ROWS
 def getCsvData(options):
     #getCsvData extracts the specified columns from the csv file
     #the columns are a list of strings with the csv column letter identifier:
     #example: columns = ['a', 'c', 'd', 'l', 'm']
     #it returns a list of row-lists (one list per row) in that column order
-
 
     columns = options.csvColumns
     shData = [] #initialise a list to store each row-list
@@ -466,7 +512,6 @@ def getCsvData(options):
                 if len(shRow) == 0: break 
                 #don't import the header row
                 if rowIdx == 0:continue
-                    
                                     
                 #append each row of data to a list
                 row=[]
@@ -485,7 +530,11 @@ def getCsvData(options):
                     print '.',
                     continue
                 shData.append(row)
+                
+    if options.csvPivotCols:
+        print 'csvPivotCols', options.csvPivotCols
     return shData
+#----------------------------------------------------------------------------
 
 
 #================================================================

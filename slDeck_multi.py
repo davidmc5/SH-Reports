@@ -297,6 +297,42 @@ def multiDeck(tbl_options):
     #      ''')
     # data = c.fetchall()
 #--------------------------------------------------------------------
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#     # SQL TESTS
+#     # prints all instances of values if a column has any letters
+#     
+#     c.execute('''
+#     SELECT san, sw_name, slot_port
+#         FROM
+#             PortErrorCnt
+#         WHERE
+#             CAST(err_c3Discards as decimal) > 700
+#         GROUP BY
+#             san, sw_name, slot_port
+#         ORDER BY
+#             san
+#        ''')
+#        
+#        
+#     #This moves the cursor c so the next fetchall returns nothing!
+#     # for row in c:
+#     #     print row.keys()
+# 
+#        
+#     data = c.fetchall()
+#        
+#     headers = [('SAN',
+#                 'Switch Name',
+#                 'Slot / Port',
+#                 'Errors')]
+#     #Add table's headers row to data
+#     data = addHeaders(headers, data)
+#     if data:
+#         create_single_table_db(data, tbl_options)
+# 
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #--------------------------------------------------------
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # SQL TESTS
     # prints all instances of values if a column has any letters
     
@@ -304,19 +340,13 @@ def multiDeck(tbl_options):
     SELECT san, sw_name, slot_port, err_c3Discards
         FROM
             PortErrorCnt
-        WHERE
-            CAST(err_c3Discards as decimal) > 700
+        WHERE CAST(err_c3Discards as decimal) > 600
         GROUP BY
             san, sw_name, slot_port
         ORDER BY
             san
        ''')
-       
-    for row in c:
-        #print(row['name'])
-        print row.keys()
-
-       
+   
     data = c.fetchall()
        
     headers = [('SAN',
@@ -325,14 +355,11 @@ def multiDeck(tbl_options):
                 'Errors')]
     #Add table's headers row to data
     data = addHeaders(headers, data)
-    print data
-    #print c[1]
-    for row in c:
-        #print(row['name'])
-        print row.keys()
-    #--------------------------------------------------------
     if data:
         create_single_table_db(data, tbl_options)
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #--------------------------------------------------------
 
 
 # #--------------------------------------------------------------------
