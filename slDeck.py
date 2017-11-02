@@ -135,35 +135,79 @@ def loadDbTables(tbl_options):
 #ADDING PORT ERROR SLIDE
 #-----------------------------
 ##Import into dbtable:  PortErrorCounters.csv
+    # tbl_options.csvFile = 'PortErrorCounters'
+    # tbl_options.csvColumns = [
+    #     'a', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+    #     'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
+    # 
+    # tbl_options.dbTableName = 'PortErrorCnt'
+    # tbl_options.dbColNames = '''
+    # san TEXT,
+    # sw_name TEXT,
+    # slot_port TEXT,
+    # tx_frames,
+    # rx_frames,
+    # err_encInFrame TEXT,
+    # err_crc TEXT,
+    # err_shortFrame TEXT,
+    # err_longFrame TEXT,
+    # err_badEOF TEXT,
+    # err_encOutFrame TEXT,
+    # err_c3Discards TEXT,
+    # err_linkFailure TEXT,
+    # err_synchLost TEXT,
+    # err_sigLost TEXT,
+    # err_frameReject TEXT,
+    # err_frameBusy TEXT,
+    # avPerf TEXT,
+    # pkPerf TEXT,
+    # buffReserved TEXT,
+    # buffUsed TEXT
+    # '''
+    # csv_to_db(tbl_options)
+#-----------------------------
+#-----------------------------
+#ADDING PORT ERROR SLIDE
+#-----------------------------
+##Import into dbtable:  PortErrorCounters.csv
     tbl_options.csvFile = 'PortErrorCounters'
     tbl_options.csvColumns = [
-        'a', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
-        'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
+        'a', 'g', 'h', 'i', 'v', 'w', 'x', 'y', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+        'r', 's', 't', 'u']
 
     tbl_options.dbTableName = 'PortErrorCnt'
     tbl_options.dbColNames = '''
     san TEXT,
     sw_name TEXT,
     slot_port TEXT,
-    tx_frames,
-    rx_frames,
-    err_encInFrame TEXT,
-    err_crc TEXT,
-    err_shortFrame TEXT,
-    err_longFrame TEXT,
-    err_badEOF TEXT,
-    err_encOutFrame TEXT,
-    err_c3Discards TEXT,
-    err_linkFailure TEXT,
-    err_synchLost TEXT,
-    err_sigLost TEXT,
-    err_frameReject TEXT,
-    err_frameBusy TEXT,
-    avPerf TEXT,
+    tx_frames TEXT,
+    rx_frames TEXT,
+    avPerf INT,
     pkPerf TEXT,
     buffReserved TEXT,
-    buffUsed TEXT
+    buffUsed TEXT,
+    error_type TEXT,
+    error_count INT
     '''
+    
+    # tbl_options.csvPivotCols = [
+    #     'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+    #     'r', 's', 't', 'u']
+        
+    tbl_options.csvPivotCols = [
+        'encInFrame',
+        'crc',
+        'shortFrame',
+        'longFrame',
+        'badEOF',
+        'encOutFrame',
+        'c3Discards',
+        'linkFailure',
+        'synchLost',
+        'sigLost',
+        'frameReject',
+        'frameBusy']
+
     csv_to_db(tbl_options)
 #-----------------------------
 #-----------------------------
@@ -192,6 +236,7 @@ def loadDbTables(tbl_options):
     chg_sigLost TEXT,
     chg_frameBusy TEXT
     '''
+    
     csv_to_db(tbl_options)
 #-----------------------------
 

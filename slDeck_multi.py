@@ -337,14 +337,15 @@ def multiDeck(tbl_options):
     # prints all instances of values if a column has any letters
     
     c.execute('''
-    SELECT san, sw_name, slot_port, err_c3Discards
+    SELECT san, sw_name, slot_port, error_type, error_count
         FROM
             PortErrorCnt
-        WHERE CAST(err_c3Discards as decimal) > 600
-        GROUP BY
-            san, sw_name, slot_port
+        WHERE 
+            error_count > 999
+            AND
+            avPerf > 0
         ORDER BY
-            san
+            error_count DESC
        ''')
    
     data = c.fetchall()
@@ -352,7 +353,8 @@ def multiDeck(tbl_options):
     headers = [('SAN',
                 'Switch Name',
                 'Slot / Port',
-                'Errors')]
+                'Error Type',
+                'Error_count')]
     #Add table's headers row to data
     data = addHeaders(headers, data)
     if data:

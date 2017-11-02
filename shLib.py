@@ -485,6 +485,7 @@ def col2num(col):
 # #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------
 # CHANGES TO PIVOT/TRANSPOSE THE ERROR COLUMNS INTO ROWS
+
 def getCsvData(options):
     #getCsvData extracts the specified columns from the csv file
     #the columns are a list of strings with the csv column letter identifier:
@@ -530,12 +531,63 @@ def getCsvData(options):
                     print '.',
                     continue
                 shData.append(row)
-                
-    if options.csvPivotCols:
-        print 'csvPivotCols', options.csvPivotCols
+        #transpose the specified columns into rows        
+    if options.csvPivotCols != None:
+        #pivot_csvCols2Rows(shData, options)
+        return (pivot_csvCols2Rows(shData, options))
     return shData
 #----------------------------------------------------------------------------
 
+def pivot_csvCols2Rows(csvData, options):
+    #print options.csvPivotCols
+    
+    #convert columns to transpose, from letters to indexes
+    # headerIdx = []
+    # for col in options.csvPivotCols:
+    #     headerIdx.append(col[0])
+
+    pivotData = []
+    for row in csvData:
+        tmpRow=row[:9] #store the common columns
+        #print 'length', len(csvData[0]), len(tmpRow), len(options.csvPivotCols)
+        for index, colVal in enumerate (row[9:]):
+            colVal = convert(colVal)
+            if colVal != 0:
+                newRow= copy.deepcopy(tmpRow)
+                newRow.append(options.csvPivotCols[index])
+                newRow.append(colVal)
+                pivotData.append(newRow)
+            
+    #reset options for next slide
+    options.csvPivotCols = None
+    return(pivotData)
+# #------------------------------------------------------------
+# def convert(val):
+#     lookup = {'k': 1000, 'm': 1000000, 'g': 1000000000}
+#     unit = val[-1]
+#     try:
+#         number = float(val[:-1])
+#     #except ValueError:
+#     except:
+#         print 'value', val
+#         return int(val)
+#     if unit in lookup:
+#         return int(lookup[unit] * number)
+#     return int(val)
+# #------------------------------------------------------------
+#------------------------------------------------------------
+def convert(val):
+    lookup = {'k': 1000, 'm': 1000000, 'g': 1000000000}
+    unit = val[-1]
+    try:
+        if unit in lookup:
+            return int(lookup[unit] * float(val[:-1]))
+        return int(val)
+    #except ValueError:
+    except:
+        print 'Could not convert value', val
+        raise
+#------------------------------------------------------------
 
 #================================================================
 # For testing, exectuting just this file

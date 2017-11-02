@@ -251,6 +251,38 @@ def singleDeck(tbl_options):
    
 
 #--------------------------------------------------------------------
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # SQL TESTS
+    # prints all instances of values if a column has any letters
+    
+    c.execute('''
+    SELECT sw_name, slot_port, error_type, error_count
+        FROM
+            PortErrorCnt
+        WHERE 
+            error_count > 999
+            AND
+            avPerf > 0
+            AND
+            san = ?
+        ORDER BY
+            error_count DESC
+       ''', (sanName,))
+   
+    data = c.fetchall()
+       
+    headers = [('Switch Name',
+                'Slot / Port',
+                'Error Type',
+                'Error_count')]
+    #Add table's headers row to data
+    data = addHeaders(headers, data)
+    if data:
+        create_single_table_db(data, tbl_options)
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#--------------------------------------------------------------------
 #--------------------------------------------------------------------
     # END OF SLIDES
     saveDeck(tbl_options)

@@ -32,6 +32,7 @@ class Table_Options:
         self.csvFile = None # current csv file name to extract data from
         self.csvColumns = [] # current csv  columns (letters) to extract
         self.csvPivotCols = None
+        self.csvPivotHeaders = None
 
         self.dbConnection = None # db Connection handler: conn = sql.connect(sqlite_file)
         self.dbTableName = None #name of the db table to create
@@ -324,6 +325,13 @@ def colWidth(max_word_length, font_size):
     and the font size in Pt.
     '''
         #Find the correction FACTOR
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #NOTE:
+        #AS THE FONT GETS SMALLER, THE CORRECTION BECOMES MORE NON-LINEAR
+        #THE CORRECTION FACTOR NEEDS TO DECREASE 
+        #AS THE NUMBER OF SYMBOLS INCREASES
+        #otherwise, the smaller strings fit right in 
+        #but the longer ones have too much empty space around.
     if font_size > 19:
         weight = 0.57
     elif font_size > 18:
@@ -332,7 +340,10 @@ def colWidth(max_word_length, font_size):
         weight = 0.60
     elif font_size > 11:
         weight = 0.65
-    else: weight = 0.70
+    elif font_size > 10:
+        weight = 0.70
+    else: weight = 1.00
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     
     return (Pt( font_size + font_size * max_word_length * weight ) )
