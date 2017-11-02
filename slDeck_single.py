@@ -252,11 +252,15 @@ def singleDeck(tbl_options):
 
 #--------------------------------------------------------------------
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # SQL TESTS
-    # prints all instances of values if a column has any letters
+    # Port Error Slide
+    # Shows all the ports with more than 1k errors and avPerf > 0
+    
+    tbl_options.title = 'Port Errors'
+    tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 0'
+    tbl_options.subtitle_fontSize = Pt(20)
     
     c.execute('''
-    SELECT sw_name, slot_port, error_type, error_count
+    SELECT sw_name, slot_port, avPerf, error_type, error_count
         FROM
             PortErrorCnt
         WHERE 
@@ -273,8 +277,9 @@ def singleDeck(tbl_options):
        
     headers = [('Switch Name',
                 'Slot / Port',
+                'Av Perf',
                 'Error Type',
-                'Error_count')]
+                'Error Count')]
     #Add table's headers row to data
     data = addHeaders(headers, data)
     if data:
