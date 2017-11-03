@@ -26,11 +26,12 @@ class Table_Options:
 
         self.custData = None
         self.archv_opt = None
-        
-        self.sanList = [] # the list of SAN names and csvPath of retrieved csv files
+        #!
+        self.sanList = None # the list of SAN names and csvPath of retrieved csv files
 
         self.csvFile = None # current csv file name to extract data from
-        self.csvColumns = [] # current csv  columns (letters) to extract
+        #!
+        self.csvColumns = None # current csv  columns (letters) to extract
         self.csvPivotCols = None
         self.csvPivotHeaders = None
 
@@ -53,7 +54,7 @@ class Table_Options:
         self.last_col = False
         self.left = Inches(1.0)
         self.top = Inches(2.25)
-        
+        #!
         self.title = ' '
         self.subtitle = ' '
         self.subtitle_fontSize = Pt(30)
@@ -508,10 +509,13 @@ def saveDeck(tbl_options):
     #Note: the db may need to remain open if using the RAM file option
     #tbl_options.dbConnection.close()
 
+    #!
     #save the slide deck to the customer's SH directory
     #using the current san health file name
-    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    #customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
     folder = drive + startFolder + customer + shFolder
+    #!
     
     #but if a slide deck with the same name already exists and it is open
     #add a timestamp to the name to make it unique    

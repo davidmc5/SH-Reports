@@ -12,8 +12,11 @@ def singleDeck(tbl_options):
     conn = tbl_options.dbConnection
     c = conn.cursor()
     
+    #!
     #retrieve this report's variables
-    customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    #customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
+    #!
 #--------------------------------------------------------
     
     ###SLIDE COPY

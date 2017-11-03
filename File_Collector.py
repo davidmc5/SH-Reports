@@ -132,13 +132,13 @@ while True:
             
             #This SH Report has CSV files. Create slide deck
             #current SAN / SH Report variables 
-            csvPath, shName, sanName, shYear = data
             
-            #save report's name and file name to archive.
-            #options.shFiles.append( (shName, shFile) )
-
+            #!
+            #csvPath, shName, sanName, shYear = data
+            csvPath, shName, sanName, shDate, shYear = data
+            #!
+            
             #add to a list all the sh names common to each report's csv files
-            #options.csvPathList.append(csvPath)
             options.sanList.append( (shName, shFile, sanName, csvPath) )
 
             #add the customer folder name to the report variables' tuple

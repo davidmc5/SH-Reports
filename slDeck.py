@@ -43,9 +43,10 @@ def loadDbTables(tbl_options):
     2) extracts the specified columns from the csv files and
     loads them into one db table per file.
     '''
-    
-    customer, csvPath, shName, sanName, shYear = tbl_options.custData
-
+    #!
+    #customer, csvPath, shName, sanName, shYear = tbl_options.custData
+    customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
+    #!
 
     #set desired table options
     #Is this needed? csvPathList is storing those now.
@@ -269,14 +270,21 @@ def createSlideDeck(tbl_options):
 
     for san in tbl_options.sanList:
         #retrieve next SAN data
-        customer, csvPath, shName, sanName, shYear = tbl_options.custData
+        #!
+        #customer, csvPath, shName, sanName, shYear = tbl_options.custData
+        customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
+        #!
+
         shName, shFile, sanName, csvPath = san
         #shName: John_Morrison_170726_1640_Maiden_Prod
         #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
         
         #and store it for the slide creator function
-        custData = (customer, csvPath, shName, sanName, shYear)
+        #!
+        #custData = (customer, csvPath, shName, sanName, shYear)
+        custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
+        #!
         
         #make and save slideDeck
         singleDeck(tbl_options)
@@ -286,9 +294,12 @@ def createSlideDeck(tbl_options):
     if len(tbl_options.sanList) > 1:
         # create a deck with the agregated data from all the downloaded reports
         #store multi SAN directive to use the customer name as the file name.
+        #!
         sanName = 'ALL'
-        custData = (customer, csvPath, shName, sanName, shYear)
+        #custData = (customer, csvPath, shName, sanName, shYear)
+        custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
+        #!
 
         multiDeck(tbl_options)
         #print 'SAN', sanName

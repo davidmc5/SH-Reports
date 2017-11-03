@@ -352,11 +352,18 @@ def get_csvFileItems(csvZipFile):
     shYear = '20' + shDate[:2] #used to create SH report archive directory
     sanName = items.group(2) #used for slides subtitles
     
+    #!
+    shDate = '2017-11-03'
+    #!
+    
     #get full path common to all csv files
     #(only the csv file name ending is different)
     csvPath = csvTempFolder + shName + '_'
-    return (csvPath, shName, sanName, shYear)
-
+    
+    #!
+    #return (csvPath, shName, sanName, shYear)
+    return (csvPath, shName, sanName, shDate, shYear)
+    #!
 
 
 def get_shFiles():
@@ -539,13 +546,12 @@ def getCsvData(options):
 #----------------------------------------------------------------------------
 
 def pivot_csvCols2Rows(csvData, options):
-    #print options.csvPivotCols
-    
-    #convert columns to transpose, from letters to indexes
-    # headerIdx = []
-    # for col in options.csvPivotCols:
-    #     headerIdx.append(col[0])
-
+    '''
+    Converts the specified END options.csvPivotCols into rows
+    by adding a new row for each column, but removing the specified columns 
+    and adding just two new columns, at the end of the row, 
+    one to store the column header and the other for the column value.
+    '''
     pivotData = []
     for row in csvData:
         tmpRow=row[:9] #store the common columns
@@ -577,6 +583,10 @@ def pivot_csvCols2Rows(csvData, options):
 # #------------------------------------------------------------
 #------------------------------------------------------------
 def convert(val):
+    '''
+    Removes the units k, m, g from a string representing a number 
+    and returns an integer reprsenting the real quantity.
+    ''' 
     lookup = {'k': 1000, 'm': 1000000, 'g': 1000000000}
     unit = val[-1]
     try:
