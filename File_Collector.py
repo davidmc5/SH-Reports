@@ -139,7 +139,7 @@ while True:
             #!
             
             #add to a list all the sh names common to each report's csv files
-            options.sanList.append( (shName, shFile, sanName, csvPath) )
+            options.sanList.append( (shDate, shName, shFile, sanName, csvPath) )
 
             #add the customer folder name to the report variables' tuple
             custData = (customer,) + data

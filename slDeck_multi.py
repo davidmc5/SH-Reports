@@ -53,7 +53,7 @@ def multiDeck(tbl_options):
     #place all the report file names in a list
     names = []
     for san in tbl_options.sanList:
-        names.append(san[0])
+        names.append(san[1])
     count = len(names)
     title = "SAN Health Combined Report"
     subtitle = customer + ' - Reports Included (' + str(count) + '):'  

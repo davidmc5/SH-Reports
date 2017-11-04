@@ -138,7 +138,7 @@ def archiveFiles(options):
     archv_opt = options.archv_opt
     
     for san in options.sanList:
-        shName, shFile, sanName, csvPath = san
+        shDate, shName, shFile, sanName, csvPath = san
         #print 'ARCHIVING', shFile
 
         if archv_opt != 'no_remote':
@@ -352,8 +352,10 @@ def get_csvFileItems(csvZipFile):
     shYear = '20' + shDate[:2] #used to create SH report archive directory
     sanName = items.group(2) #used for slides subtitles
     
-    #!
-    shDate = '2017-11-03'
+    # Format the report date for sqlite 'YYYY-MM-DD'
+    #170726 --> 2017-11-03
+    shDate = shYear + '-' + shDate[2:4] + '-' + shDate[4:]
+    #print shDate
     #!
     
     #get full path common to all csv files
@@ -440,56 +442,6 @@ def col2num(col):
             num = num * 26 + (ord(c.upper()) - ord('A')) + 1
     return num
 
-
-# #----------------------------------------------------------------------------
-## ORIGINAL BEFORE CHANGES TO PIVOT/TRANSPOSE THE ERROR COLUMNS INTO ROWS
-# def getCsvData(options):
-#     #getCsvData extracts the specified columns from the csv file
-#     #the columns are a list of strings with the csv column letter identifier:
-#     #example: columns = ['a', 'c', 'd', 'l', 'm']
-#     #it returns a list of row-lists (one list per row) in that column order
-# 
-#     columns = options.csvColumns
-#     shData = [] #initialise a list to store each row-list
-# 
-#     csvTarget = options.csvFile + '.csv'
-#     
-#     #uncomment next to find out which csv file is the problem.
-#     #print 'TARGET', csvTarget
-# 
-#     for san in options.sanList:
-#         shName, shFile, sanName, csvPath = san
-#         csvFile = csvPath + csvTarget
-#       
-#         with open(csvFile, 'rb') as f:
-#             reader = csv.reader(f)
-# 
-#             for rowIdx, shRow in enumerate(reader):
-#                 numDataCols = len(shRow)
-#                 #stop reading when we reach the end
-#                 if len(shRow) == 0: break 
-#                 #don't import the header row
-#                 if rowIdx == 0:continue
-#                                     
-#                 #append each row of data to a list
-#                 row=[]
-#                 #first put the SAN name on first column
-#                 #this is needed when processing multiple reports (SANs)
-#                 row.append(sanName)  
-#                               
-#                 #grab only the columns requested from the csv file
-#                 try:
-#                     for col in columns:
-#                         row.append(shRow[col2num(col)-1]) #column index starts at 1
-#                 except:
-#                     #csv row is missing columns 
-#                     #Probably fields not applicable to that specific Device.
-#                     #skip this row
-#                     print '.',
-#                     continue
-#                 shData.append(row)
-#     return shData
-# #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------
 # CHANGES TO PIVOT/TRANSPOSE THE ERROR COLUMNS INTO ROWS
 
@@ -508,7 +460,7 @@ def getCsvData(options):
     #print 'TARGET', csvTarget
 
     for san in options.sanList:
-        shName, shFile, sanName, csvPath = san
+        shDate, shName, shFile, sanName, csvPath = san
         csvFile = csvPath + csvTarget
       
         with open(csvFile, 'rb') as f:
@@ -525,6 +477,7 @@ def getCsvData(options):
                 row=[]
                 #first put the SAN name on first column
                 #this is needed when processing multiple reports (SANs)
+                row.append(shDate)
                 row.append(sanName)  
                               
                 #grab only the columns requested from the csv file
@@ -551,12 +504,17 @@ def pivot_csvCols2Rows(csvData, options):
     by adding a new row for each column, but removing the specified columns 
     and adding just two new columns, at the end of the row, 
     one to store the column header and the other for the column value.
+    
+    TO DO:
+    Use a variable (assigned by slDeck.loadDbTables) for 
+    the common group end column (row[:10]). 
+    That way this function can be used to pivot other csv files
     '''
     pivotData = []
     for row in csvData:
-        tmpRow=row[:9] #store the common columns
+        tmpRow=row[:10] #store the common columns
         #print 'length', len(csvData[0]), len(tmpRow), len(options.csvPivotCols)
-        for index, colVal in enumerate (row[9:]):
+        for index, colVal in enumerate (row[10:]):
             colVal = convert(colVal)
             if colVal != 0:
                 newRow= copy.deepcopy(tmpRow)
@@ -567,20 +525,6 @@ def pivot_csvCols2Rows(csvData, options):
     #reset options for next slide
     options.csvPivotCols = None
     return(pivotData)
-# #------------------------------------------------------------
-# def convert(val):
-#     lookup = {'k': 1000, 'm': 1000000, 'g': 1000000000}
-#     unit = val[-1]
-#     try:
-#         number = float(val[:-1])
-#     #except ValueError:
-#     except:
-#         print 'value', val
-#         return int(val)
-#     if unit in lookup:
-#         return int(lookup[unit] * number)
-#     return int(val)
-# #------------------------------------------------------------
 #------------------------------------------------------------
 def convert(val):
     '''

@@ -7,33 +7,12 @@ from slDeck_single import singleDeck
 from slDeck_multi import multiDeck
 from shLib import logEntry
 
-#------------------------------------------------
-# def formatDbUsed(data):
-#     #convert the bytes value into a MB to shorten the width of the column
-#     newData = []
-#     #grab the dbUse value
-#     for row in data:
-#         #Example: (row[6] = 11.7% of 1045274B)
-#         #Example: (row[6] = 11% of 1045274B)
-#         # extract 1045274B and convert to 1.0MB
-#         #items = re.match('(\d+\.\d+%)\s+of\s+(\d+)B', row[5])
-#         #1) grab everything before the % sign
-#         #2) grab everything between 'of' and 'B'
-#         items = re.match('(.+)%\s+of(.+)B', row[5])
-#         #print items.group(1)
-#         #print items.group(2)
-# 
-#         # get the two items in parenthesis (the usage % and the db size in B)
-#         usage = round( float(items.group(1)), 1)
-#         # convert Bytes to MB
-#         mb = float(items.group(2))/1000000
-#         lst = list(row[:5]) # save the first 4 elements
-#         # add the last element(db usage) to the tuple
-#         #(tuples are immutable so first convert to a list 
-#         lst.append(str(usage) + '%' + '  of ' + str(round(mb, 1)) + ' MB')
-#         newData.append(tuple(lst))
-#     return newData
 #----------------------------------------------------------------------
+# NOTES
+#1) The reports' name (sanName), and date (shDate)
+# are being added by shLib.getCsvData()
+# <--sqLib.fill_dbTable() <--sqlib.csv_to_db() <--slDeck.loadDbTables()
+
 #----------------------------------------------------------------------
 def loadDbTables(tbl_options):
     '''
@@ -67,6 +46,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'switches'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_name TEXT PRIMARY KEY,
     sw_sn TEXT,
@@ -86,6 +66,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'ports'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_name TEXT PRIMARY KEY,
     total_ports INT,
@@ -106,6 +87,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'frus'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_name TEXT,
     fru_type TEXT,
@@ -123,6 +105,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'zones'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_fabric TEXT,
     active_zoneCfg TEXT,
@@ -132,44 +115,9 @@ def loadDbTables(tbl_options):
     zone_dbUsed TEXT
     '''
     csv_to_db(tbl_options)
+    
 #-----------------------------
-#ADDING PORT ERROR SLIDE
-#-----------------------------
-##Import into dbtable:  PortErrorCounters.csv
-    # tbl_options.csvFile = 'PortErrorCounters'
-    # tbl_options.csvColumns = [
-    #     'a', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
-    #     'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
-    # 
-    # tbl_options.dbTableName = 'PortErrorCnt'
-    # tbl_options.dbColNames = '''
-    # san TEXT,
-    # sw_name TEXT,
-    # slot_port TEXT,
-    # tx_frames,
-    # rx_frames,
-    # err_encInFrame TEXT,
-    # err_crc TEXT,
-    # err_shortFrame TEXT,
-    # err_longFrame TEXT,
-    # err_badEOF TEXT,
-    # err_encOutFrame TEXT,
-    # err_c3Discards TEXT,
-    # err_linkFailure TEXT,
-    # err_synchLost TEXT,
-    # err_sigLost TEXT,
-    # err_frameReject TEXT,
-    # err_frameBusy TEXT,
-    # avPerf TEXT,
-    # pkPerf TEXT,
-    # buffReserved TEXT,
-    # buffUsed TEXT
-    # '''
-    # csv_to_db(tbl_options)
-#-----------------------------
-#-----------------------------
-#ADDING PORT ERROR SLIDE
-#-----------------------------
+
 ##Import into dbtable:  PortErrorCounters.csv
     tbl_options.csvFile = 'PortErrorCounters'
     tbl_options.csvColumns = [
@@ -178,6 +126,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'PortErrorCnt'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_name TEXT,
     slot_port TEXT,
@@ -191,10 +140,6 @@ def loadDbTables(tbl_options):
     error_count INT
     '''
     
-    # tbl_options.csvPivotCols = [
-    #     'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
-    #     'r', 's', 't', 'u']
-        
     tbl_options.csvPivotCols = [
         'encInFrame',
         'crc',
@@ -220,6 +165,7 @@ def loadDbTables(tbl_options):
 
     tbl_options.dbTableName = 'PortErrorChg'
     tbl_options.dbColNames = '''
+    date TEXT,
     san TEXT,
     sw_name TEXT,
     slot_port TEXT,
@@ -275,7 +221,7 @@ def createSlideDeck(tbl_options):
         customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
         #!
 
-        shName, shFile, sanName, csvPath = san
+        shDate, shName, shFile, sanName, csvPath = san
         #shName: John_Morrison_170726_1640_Maiden_Prod
         #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
         
@@ -307,48 +253,6 @@ def createSlideDeck(tbl_options):
    # END OF SLIDES
    #note: the db connection is opened by loadDbTables
     tbl_options.dbConnection.close()
-# #--------------------------------------------------------------------
-# def saveDeck(tbl_options):
-#     ''' Store a remote and local copy of the slide deck
-#     This is used by both, slDeck_single and slDeck_multi'''
-#     #close the connection to the database file
-#     #Note: the db may need to remain open if using the RAM file option
-#     #tbl_options.dbConnection.close()
-# 
-#     #save the slide deck to the customer's SH directory
-#     #using the current san health file name
-#     customer, csvPath, shName, sanName, shYear = tbl_options.custData
-#     folder = drive + startFolder + customer + shFolder
-#     
-#     #but if a slide deck with the same name already exists and it is open
-#     #add a timestamp to the name to make it unique    
-#     timestamp = datetime.datetime.now().strftime("%y-%m-%d-%H%M")
-#     datestamp = datetime.datetime.now().strftime("%y-%m-%d")
-# 
-#     prs = tbl_options.presentation
-# 
-#     if sanName == 'ALL':
-#         shName = customer + '_AGGREGATE_' + datestamp
-#         
-#     try:
-#         prs.save(folder + shName + '.pptx')
-#     except:
-#         #if slide deck with the same name is open...
-#         #... store a new one renamed with a timestamp 
-#         print folder + shName, 'Kept Open'
-#         prs.save(folder + shName + '-'+ timestamp + '.pptx')
-# 
-#     #save a LOCAL copy of the slide deck
-#     folder = archiveFolder
-#     try:
-#         prs.save(folder + shName + '.pptx')
-#     except:
-#         #if slide deck with the same name is open...
-#         #... store a new one renamed with a timestamp 
-#         print folder + shName, 'Kept Open'
-#         prs.save(folder + shName + '-'+ timestamp + '.pptx')
-# # #-----------------------------------------------------------------
-
 
 #/////////////////////////////////////////////////////////////////
 #FOR TESTING JUST SLIDE DECK CREATION, EXECUTE THIS SCRIPT
