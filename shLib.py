@@ -516,10 +516,14 @@ def pivot_csvCols2Rows(csvData, options):
         #print 'length', len(csvData[0]), len(tmpRow), len(options.csvPivotCols)
         for index, colVal in enumerate (row[10:]):
             colVal = convert(colVal)
+            #only create rows for non-zero errors
             if colVal != 0:
                 newRow= copy.deepcopy(tmpRow)
+                #store the name of the error
                 newRow.append(options.csvPivotCols[index])
+                #store the error count
                 newRow.append(colVal)
+                #and save the new row
                 pivotData.append(newRow)
             
     #reset options for next slide

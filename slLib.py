@@ -58,6 +58,7 @@ class Table_Options:
         self.title = ' '
         self.subtitle = ' '
         self.subtitle_fontSize = Pt(30)
+        self.table_font = Pt(18)
 
         #TODO?
         #from pptx.enum.dml import MSO_THEME_COLOR
@@ -320,6 +321,7 @@ def create_table(slide, data, options):
     format_table(table, options)
     #reset font size in case it was changed
     options.subtitle_fontSize = Pt(30)
+    options.font_size = Pt(18)
     return table
 ##------------------------------------------------------------------------------------^^^^^^^^^
 

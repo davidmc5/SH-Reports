@@ -6,7 +6,7 @@ from sqlLib import *
 from slDeck_single import singleDeck
 from slDeck_multi import multiDeck
 from shLib import logEntry
-
+import time
 #----------------------------------------------------------------------
 # NOTES
 #1) The reports' name (sanName), and date (shDate)
@@ -101,13 +101,14 @@ def loadDbTables(tbl_options):
     
 ##Import into dbtable:  FabricSummary.csv
     tbl_options.csvFile = 'FabricSummary'
-    tbl_options.csvColumns = ['a', 'r', 'v', 'z', 'ad', 'ag']
+    tbl_options.csvColumns = ['a', 'b','r', 'v', 'z', 'ad', 'ag']
 
     tbl_options.dbTableName = 'zones'
     tbl_options.dbColNames = '''
     date TEXT,
     san TEXT,
     sw_fabric TEXT,
+    principalSw TEXT,
     active_zoneCfg TEXT,
     hang_alias INT,
     hang_zones INT,
@@ -210,28 +211,35 @@ def createSlideDeck(tbl_options):
     #--------------------------------------------------------
     #SLIDE CREATION
     #--------------------------------------------------------
-    # 1) loop over the options.sanList tuplets (sanName, csvPath),
+    # 1) loop over the options.sanList tuplets
+    #   (shDate, shName, shFile, sanName, csvPath),
     # 2) store current san pointer into tbl_options.custData
     # 3) call slide deck creator (single or multi)
 
     for san in tbl_options.sanList:
         #retrieve next SAN data
-        #!
-        #customer, csvPath, shName, sanName, shYear = tbl_options.custData
         customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
-        #!
-
         shDate, shName, shFile, sanName, csvPath = san
-        #shName: John_Morrison_170726_1640_Maiden_Prod
-        #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
+            #shDate: 2017-07-26
+            #shName: John_Morrison_170726_1640_Maiden_Prod
+            #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
+            #sanName: Maiden_Prod
+            #csvPath: F:/Users/David/Desktop/SH-COLLECTOR/Downloads/csvTemp/John_Morrison_170726_1640_Maiden_Prod_'
         
         #and store it for the slide creator function
-        #!
-        #custData = (customer, csvPath, shName, sanName, shYear)
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
-        #!
         
+        #-------------------------------------------------------
+        #-------------------------------------------------------
+        # determine if all files are multi-date
+        multiDate_check(tbl_options)
+        
+        #-------------------------------------------------------
+        #-------------------------------------------------------
+
+        
+        #SINGLE DATE ONLY FROM THIS POINT BELOW!
         #make and save slideDeck
         singleDeck(tbl_options)
         #print 'SAN', sanName
@@ -240,19 +248,61 @@ def createSlideDeck(tbl_options):
     if len(tbl_options.sanList) > 1:
         # create a deck with the agregated data from all the downloaded reports
         #store multi SAN directive to use the customer name as the file name.
-        #!
         sanName = 'ALL'
-        #custData = (customer, csvPath, shName, sanName, shYear)
+        
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
-        #!
-
+        #create agregated slide deck 
         multiDeck(tbl_options)
         #print 'SAN', sanName
         logEntry('Slides Created', customer, 'Agregate')
    # END OF SLIDES
    #note: the db connection is opened by loadDbTables
     tbl_options.dbConnection.close()
+#-------------------------------------------------------
+#-------------------------------------------------------
+#reference: elements in options.sanList:
+#shDate, shName, shFile, sanName, csvPath = san
+#shDate: 2017-07-26
+#sanName: Maiden_Prod
+
+def multiDate_check(tbl_options):
+    reports = {}
+    for san in tbl_options.sanList:
+        update_sanDates(san, reports)
+    print reports
+            
+    newDate = time.strptime(san[0], "%Y-%m-%d")
+        #print san[0], newDate
+        
+    date1= "2017-06-25"
+    date2= "2017-06-26"
+    print date1 > date2, date1 < date2
+            
+def update_sanDates(this_san, prev_sans):
+    '''
+    Check if the given san has already been added to the dictionary
+    
+    1)If a new san, store its name (as the key) in the dictionary and 
+    set the new/previous report dates the same to the current report. 
+
+    2)If already added, update newer/older date fields. 
+    We'll use just the two most recent reports and ignore the rest.
+    '''
+    if this_san[3] in prev_sans:
+        #SAN name already exists (same report with multiple dates)
+        print this_san[3], 'Exists'
+        prev_sans[this_san[3]][1]= this_san[0]
+        #print 'existing san', prev_sans[this_san[3]]
+    else:
+        #SAN name not seen before. Add it with same new/prev dates.
+        prev_sans[this_san[3]]= [this_san[0], this_san[0]]
+        print this_san[3], 'Added!'
+    #print reports
+
+    
+#-------------------------------------------------------
+#-------------------------------------------------------
 
 #/////////////////////////////////////////////////////////////////
 #FOR TESTING JUST SLIDE DECK CREATION, EXECUTE THIS SCRIPT

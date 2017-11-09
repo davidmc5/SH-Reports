@@ -259,7 +259,7 @@ def singleDeck(tbl_options):
     # Shows all the ports with more than 1k errors and avPerf > 0
     
     tbl_options.title = 'Port Errors'
-    tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 0'
+    tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
     tbl_options.subtitle_fontSize = Pt(20)
     
     c.execute('''
@@ -269,7 +269,7 @@ def singleDeck(tbl_options):
         WHERE 
             error_count > 999
             AND
-            avPerf > 0
+            avPerf > 10
             AND
             san = ?
         ORDER BY
@@ -280,7 +280,7 @@ def singleDeck(tbl_options):
        
     headers = [('Switch Name',
                 'Slot / Port',
-                'Av Perf',
+                'Avg Perf (MB)',
                 'Error Type',
                 'Error Count')]
     #Add table's headers row to data

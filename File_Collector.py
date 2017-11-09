@@ -130,21 +130,17 @@ while True:
                 archiveBad(customer, shFile)
                 continue
             
-            #This SH Report has CSV files. Create slide deck
-            #current SAN / SH Report variables 
-            
-            #!
-            #csvPath, shName, sanName, shYear = data
+            #This SH Report has CSV files. 
+            #Create slide deck with current SAN / SH Report variables 
             csvPath, shName, sanName, shDate, shYear = data
-            #!
             
             #add to a list all the sh names common to each report's csv files
             options.sanList.append( (shDate, shName, shFile, sanName, csvPath) )
 
             #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
+            #store customer variables tuple into options
             options.custData = custData
-            #print custData
             
             #do not archive the remote report zip files for this customer
             #place this in a config file!
@@ -163,7 +159,7 @@ while True:
             #no reports with valid csv files for this customer.
             #go to next customer.
             continue
-        
+
         #Open the database and load one table per csv file
         loadDbTables(options)
         #create Slide Deck(s) 
