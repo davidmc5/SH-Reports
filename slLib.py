@@ -92,26 +92,6 @@ def formatDbUsed(data):
         newData.append(tuple(lst))
     return newData
 #---------------------------------------------------------------
-##def formatFruStatus(data):
-##    ''' format the fru status to show either none (for blank, ok or enabled)
-##        or other'''
-##    
-##    newData=[]
-##    #grab the swtich Status value
-##    for row in data:
-##
-##        status = row[5].lower()
-##        if (status == 'ok') or\
-##           (status == 'enabled') or\
-##           (status == ''):
-##            status = 'None'
-##
-##        lst = list(row[:5]) # save the first 4 elements
-##        # add the last element(db usage) to the tuple
-##        #(tuples are immutable so first convert to a list 
-##        lst.append(str(status))
-##        newData.append(tuple(lst))
-##    return newData
 
 def fSize(numLines, maxFsize=20):    
     '''
@@ -341,11 +321,13 @@ def colWidth(max_word_length, font_size):
     if font_size > 19:
         weight = 0.57
     elif font_size > 18:
-        weight = 0.55
-    elif font_size > 12:
         weight = 0.60
-    elif font_size > 11:
+    elif font_size > 15:
         weight = 0.65
+    elif font_size > 12:
+        weight = 0.65
+    elif font_size > 11:
+        weight = 0.90
     elif font_size > 10:
         weight = 0.70
     else: weight = 1.00

@@ -84,7 +84,8 @@ def singleDeck(tbl_options):
         SUM(ports.isl_ports),
         SUM(ports.hosts),
         SUM(ports.disks),
-        SUM(ports.total_devices)
+        SUM(ports.total_devices),
+        printf('%.0d %', 100 * ( SUM(ports.total_ports) - SUM(ports.unused_ports) ) / SUM(ports.total_ports))
     FROM
         switches s
 
@@ -114,7 +115,8 @@ def singleDeck(tbl_options):
                 'ISL Ports',
                 'Hosts',
                 'Disks',
-                'Total Devices')]
+                'Total Devices',
+                'Ports Used')]
 
     headers.extend(data)
     data = headers
@@ -256,7 +258,7 @@ def singleDeck(tbl_options):
 #--------------------------------------------------------------------
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # Port Error Slide
-    # Shows all the ports with more than 1k errors and avPerf > 0
+    # Shows all the ports with more than 1k errors and avPerf > 10
     
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'

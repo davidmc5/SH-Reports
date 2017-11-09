@@ -106,7 +106,6 @@ def multiDeck(tbl_options):
         SUM(ports.disks),
         SUM(ports.total_devices),
         printf('%.0d %', 100 * ( SUM(ports.total_ports) - SUM(ports.unused_ports) ) / SUM(ports.total_ports))
-        
     FROM
         switches s
     
@@ -297,110 +296,8 @@ def multiDeck(tbl_options):
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = customer
 
-   #  
-   #  c.execute('''
-   #  SELECT
-   #      san,
-   #      sw_name,
-   #      COUNT(*)
-   #  FROM
-   #      PortErrorCnt
-   #  WHERE
-   #      avPerf > 100 AND err_c3Discards > 100
-   # 
-   #  GROUP BY
-   #      san, sw_name, slot_port
-   #  ORDER BY
-   #      san
-   # ''')
-   #  data = c.fetchall()
-   #  
-    #--------------------------------------------------------
-    #table headers
-    # headers = [('SAN',
-    #             'Switch Name',
-    #             'Num Errors')]
-    # #Add table's headers row to data
-    # data = addHeaders(headers, data)
-    # #--------------------------------------------------------
-    # if data:
-    #     create_single_table_db(data, tbl_options)
-
-# 
-# #--------------------------------------------------------------------
-    #SQL TESTS
-    #prints all instances of values if a column has any letters
-    
-    # c.execute('''
-    # WITH errors AS (
-    #     SELECT sw_name, slot_port, err_c3Discards 
-    #     FROM PortErrorCnt
-    #     WHERE CAST(err_c3Discards as decimal) > 600)
-    #     SELECT * FROM errors
-    #     ''')
-    # c.execute('''
-    # SELECT san,
-    # FROM PortErrorCnt
-    # ''')
-    # data = c.fetchall()
-    # print data
-#WHERE err_c3Discards GLOB '*[A-Za-z]*' OR CAST(err_c3Discards as decimal) > 100
-#WHERE CAST(err_c3Discards as decimal) > 800
-#------------------------------------------------------
-    # c.execute('''
-    #  SELECT
-    #      san,
-    #      sw_name,
-    #      slot_port,
-    #      COUNT(*)
-    #  FROM
-    #      PortErrorCnt
-    #  WHERE
-    #     err_c3Discards != 0
-    #     avPerf > 100 AND err_c3Discards > 100
-    #  GROUP BY
-    #      san, sw_name, slot_port
-    #      ''')
-    # data = c.fetchall()
-#--------------------------------------------------------------------
-# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#     # SQL TESTS
-#     # prints all instances of values if a column has any letters
-#     
-#     c.execute('''
-#     SELECT san, sw_name, slot_port
-#         FROM
-#             PortErrorCnt
-#         WHERE
-#             CAST(err_c3Discards as decimal) > 700
-#         GROUP BY
-#             san, sw_name, slot_port
-#         ORDER BY
-#             san
-#        ''')
-#        
-#        
-#     #This moves the cursor c so the next fetchall returns nothing!
-#     # for row in c:
-#     #     print row.keys()
-# 
-#        
-#     data = c.fetchall()
-#        
-#     headers = [('SAN',
-#                 'Switch Name',
-#                 'Slot / Port',
-#                 'Errors')]
-#     #Add table's headers row to data
-#     data = addHeaders(headers, data)
-#     if data:
-#         create_single_table_db(data, tbl_options)
-# 
-# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #--------------------------------------------------------
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # Port Error Slide
-    # Shows all the ports with more than 1k errors and avPerf > 0
+     # Port Error Slide
+    # Shows all the ports with more than 1k errors and avPerf > 10
     
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
