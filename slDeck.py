@@ -8,10 +8,12 @@ from slDeck_multi import multiDeck
 from shLib import logEntry
 import time
 #----------------------------------------------------------------------
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # NOTES
 #1) The reports' name (sanName), and date (shDate)
 # are being added by shLib.getCsvData()
 # <--sqLib.fill_dbTable() <--sqlib.csv_to_db() <--slDeck.loadDbTables()
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #----------------------------------------------------------------------
 def loadDbTables(tbl_options):
@@ -22,14 +24,14 @@ def loadDbTables(tbl_options):
     2) extracts the specified columns from the csv files and
     loads them into one db table per file.
     '''
-    #!
+    #!-------------------------------------------------------
     #customer, csvPath, shName, sanName, shYear = tbl_options.custData
-    customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
+    #customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
     #!
-
+    #print tbl_options.custData 
     #set desired table options
     #Is this needed? csvPathList is storing those now.
-    tbl_options.csvPath = csvPath
+    #tbl_options.csvPath = csvPath
 
     # Open the database
     conn = sql.connect(sqlite_file)
@@ -48,7 +50,8 @@ def loadDbTables(tbl_options):
     tbl_options.dbColNames = '''
     date TEXT,
     san TEXT,
-    sw_name TEXT PRIMARY KEY,
+--    sw_name TEXT PRIMARY KEY,
+    sw_name TEXT,
     sw_sn TEXT,
     sw_model TEXT,
     sw_firmware TEXT,
@@ -68,7 +71,8 @@ def loadDbTables(tbl_options):
     tbl_options.dbColNames = '''
     date TEXT,
     san TEXT,
-    sw_name TEXT PRIMARY KEY,
+--    sw_name TEXT PRIMARY KEY,
+    sw_name TEXT,
     total_ports INT,
     unlic_ports INT,
     unused_ports INT,
@@ -218,6 +222,8 @@ def createSlideDeck(tbl_options):
 
     for san in tbl_options.sanList:
         #retrieve next SAN data
+        
+        #!!!! ONLY INTERESTED IN customer AND shYear FROM custData. 
         customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
         shDate, shName, shFile, sanName, csvPath = san
             #shDate: 2017-07-26
@@ -261,14 +267,19 @@ def createSlideDeck(tbl_options):
     tbl_options.dbConnection.close()
 #-------------------------------------------------------
 #-------------------------------------------------------
-#reference: elements in options.sanList:
-#shDate, shName, shFile, sanName, csvPath = san
-#shDate: 2017-07-26
-#sanName: Maiden_Prod
+# reference: elements in options.sanList:
+# shDate, shName, shFile, sanName, csvPath = san
+# 0    shDate: '2017-07-26'
+# 1   shName: 'cust_name_170912_0541_MW00'
+# 2   shFile: 'cust_name_170912_0541_MW00.zip'
+# 3   sanName: 'MW00'
+# 4   csvPath: 'F:/Users/David/Desktop/SH-COLLECTOR/Downloads/csvTemp/cust_name_170912_0541_MW00_'
+
 
 def multiDate_check(tbl_options):
     reports = {}
     for san in tbl_options.sanList:
+        #print san
         update_sanDates(san, reports)
     print reports
             
@@ -291,13 +302,14 @@ def update_sanDates(this_san, prev_sans):
     '''
     if this_san[3] in prev_sans:
         #SAN name already exists (same report with multiple dates)
-        print this_san[3], 'Exists'
+        #print this_san[3], 'Exists'
+        #store 
         prev_sans[this_san[3]][1]= this_san[0]
         #print 'existing san', prev_sans[this_san[3]]
     else:
         #SAN name not seen before. Add it with same new/prev dates.
         prev_sans[this_san[3]]= [this_san[0], this_san[0]]
-        print this_san[3], 'Added!'
+        #print this_san[3], 'Added!'
     #print reports
 
     

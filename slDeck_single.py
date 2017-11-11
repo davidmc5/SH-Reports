@@ -64,14 +64,12 @@ def singleDeck(tbl_options):
 
 #--------------------------------------------------------------------
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: FABRIC SUMMARY TABLE
-
-    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
-    #using two db tables from two csv files
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Fabric Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
-
 
     c.execute('''
     SELECT
@@ -89,10 +87,11 @@ def singleDeck(tbl_options):
     FROM
         switches s
 
-    INNER JOIN 
-        ports ON s.sw_name = ports.sw_name
-        AND
-        s.san = ?
+    INNER JOIN ports 
+        ON s.sw_name = ports.sw_name
+        AND s.date = ports.date
+        AND s.san = ?
+    WHERE s.date = (SELECT max(date) FROM switches)
     GROUP BY
         s.sw_fabric, s.sw_model
     ORDER BY
@@ -102,7 +101,6 @@ def singleDeck(tbl_options):
     data = c.fetchall()
     #format data with group headers (remove the group = first column data)
     data = groupHeader(data)
-
     
     #Add column headers to print on the slide table
     # this is a tuple with the column names
@@ -122,10 +120,10 @@ def singleDeck(tbl_options):
     data = headers
     create_single_table_db(data, tbl_options)
 
-
 #--------------------------------------------------------------------
-
-    #SLIDE: ZONING SUMMARY (Hanging Zones)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #SLIDE: ZONING SUMMARY (hanging zones)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
@@ -141,10 +139,9 @@ def singleDeck(tbl_options):
         zone_dbUsed
     FROM
         zones
-    WHERE
-        active_zoneCfg != 'N/A'
-        AND
-        san = ?
+    WHERE active_zoneCfg != 'N/A'
+        AND date = (SELECT max(date) FROM zones)
+        AND san = ?
      ORDER BY
         sw_fabric
    ''', (sanName,))
@@ -171,30 +168,22 @@ def singleDeck(tbl_options):
 
 #--------------------------------------------------------------------
   
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: SWITCH SUMMARY TABLE
-
-    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
-    #using two db tables from two csv files
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Switch Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
-
-
-##    #Change all fru.fru_status column data to upper case
-##      # not needed. Case change done on sql with the UPPER()
-##    c.execute('''
-##    UPDATE frus
-##    SET fru_status = UPPER(fru_status)''')
     
-    # If FRU Status is 'enabled' or 'ok', set to blank (OK)
+    # If FRU Status is 'enabled' or 'ok', set to blank (= OK)
     c.execute('''
     UPDATE frus
     SET fru_status=''
     WHERE UPPER(fru_status) = 'ENABLED' OR UPPER(fru_status) = 'OK' ''')
     conn.commit()
-
     
     #----------------------
+    
     #This query reports the total of unique combinations of
     #fabric, switch model, firmware, switch status and number of defective FRUs
     c.execute('''
@@ -209,32 +198,23 @@ def singleDeck(tbl_options):
         LEFT JOIN (
             SELECT sw_name, COUNT(*) AS fru_cnt
             FROM frus
-            WHERE 
-                fru_status != ''
+            WHERE fru_status != ''
+                AND date = (SELECT max(date) FROM frus)
             GROUP BY sw_name
             ) f
         ON f.sw_name = s.sw_name
     WHERE s.san = ?
+        AND date = (SELECT max(date) FROM switches)
     GROUP BY
         s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
     ORDER BY
         s.sw_fabric, s.sw_model, cnt
     ''', (sanName,))
-    #--------------------------------
-
-##    # this prints db column headers for the query, if used right after a query
-##    for k in c.description:
-##        print(k[0])
-
-##    # format FRU status
-##    # no longer needed since the formating is done with an SQL UPDATE command
-##    #data = formatFruStatus(data)
 
     data = c.fetchall()
     
     #format data with group headers (remove the group = first column data)
     data = groupHeader(data)
-
     
     #Add column headers to print on the slide table
     # this is a single tuple with the column names
@@ -257,8 +237,11 @@ def singleDeck(tbl_options):
 
 #--------------------------------------------------------------------
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # Port Error Slide
-    # Shows all the ports with more than 1k errors and avPerf > 10
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     #SLIDE: PORT ERRORS
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # Shows all the ports with more than 1k errors and avPerf > 10 MB
     
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
@@ -272,6 +255,8 @@ def singleDeck(tbl_options):
             error_count > 999
             AND
             avPerf > 10
+            AND 
+            date = (SELECT max(date) FROM PortErrorCnt)
             AND
             san = ?
         ORDER BY

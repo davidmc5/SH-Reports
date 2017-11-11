@@ -51,6 +51,10 @@ def multiDeck(tbl_options):
     #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
     names = []
     for san in tbl_options.sanList:
+        print san[0]
+        #!
+        # append only the max date file names.
+        #!
         names.append(san[1]) # shName
     count = len(names)
     title = "SAN Health Combined Report"
@@ -59,40 +63,13 @@ def multiDeck(tbl_options):
     textSlide(prs, title, subtitle, names)
                 
 #--------------------------------------------------------------------
-
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: FABRIC SUMMARY TABLE
-
-    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
-    #using two db tables from two csv files
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Fabric Summary'
     tbl_options.subtitle = customer
 
-#THIS WORKS -- ORIGINAL
-    # c.execute('''
-    # SELECT
-    #     sw_fabric,
-    #     sw_model,
-    #     COUNT(s.sw_name) AS count,
-    #     SUM(ports.total_ports),
-    #     SUM(ports.unlic_ports),
-    #     SUM(ports.unused_ports),
-    #     SUM(ports.isl_ports),
-    #     SUM(ports.hosts),
-    #     SUM(ports.disks),
-    #     SUM(ports.total_devices)
-    # FROM
-    #     switches s
-    # 
-    # INNER JOIN 
-    #     ports 
-    #   ON s.sw_name = ports.sw_name
-    # GROUP BY
-    #     s.sw_fabric, s.sw_model
-    # ORDER BY
-    #     s.sw_fabric, s.sw_model, count
-    # ''')
-    #---------------------------------------------------------
     c.execute('''
     SELECT
         sw_fabric,
@@ -109,55 +86,20 @@ def multiDeck(tbl_options):
     FROM
         switches s
     
-    INNER JOIN 
-        ports 
-      ON s.sw_name = ports.sw_name
+    INNER JOIN ports 
+        ON  s.sw_name = ports.sw_name 
+        AND s.date = ports.date
+    WHERE s.date = (SELECT max(date) FROM switches)
     GROUP BY
         s.sw_fabric, s.sw_model
     ORDER BY
         s.sw_fabric, s.sw_model, count
     ''')
         
-#---------------------------------------------------------
-    # c.execute('''
-    # SELECT
-    #     s.sw_fabric,
-    #     s.sw_model,
-    #     s.count,
-    #     s.tot_p.t_ports,
-    #     SUM(p.unlic_ports),
-    #     SUM(p.unused_ports) as unused,
-    #     SUM(p.isl_ports),
-    #     SUM(p.hosts),
-    #     SUM(p.disks),
-    #     SUM(p.total_devices)
-    # 
-    # 
-# FROM (SELECT
-#         sw_fabric,
-#         sw_name,
-#         sw_model,
-#         COUNT(sw_name) AS count,
-#         (SELECT san, SUM(total_ports) as t_ports FROM ports GROUP BY san) tot_p
-#     FROM switches
-#     group by sw_fabric, sw_model
-#         ) s
-# 
-#     INNER JOIN 
-#         ports p
-#     ON s.sw_name = p.sw_name
-# 
-#     GROUP BY
-#         s.sw_fabric, s.sw_model
-#     ORDER BY
-#         s.sw_fabric, s.sw_model, s.count
-#     ''')
-
     data = c.fetchall()
-    print data
+
     #format data with group headers (remove the group = first column data)
     #data = groupHeader(data)
-
     
     #Add column headers to print on the slide table
     # this is a tuple with the column names
@@ -181,12 +123,12 @@ def multiDeck(tbl_options):
 
 
 #--------------------------------------------------------------------
-
-    #SLIDE: HANGING ZONES TABLE
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #SLIDE: ZONING SUMMARY (hanging zones)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = customer
-
     
     c.execute('''
     SELECT
@@ -199,7 +141,8 @@ def multiDeck(tbl_options):
     FROM
         zones
     WHERE
-        active_zoneCfg != 'N/A' and date = (SELECT max(date) FROM zones)
+        active_zoneCfg != 'N/A' 
+    AND date = (SELECT max(date) FROM zones)
     ORDER BY
         sw_fabric
    ''')
@@ -226,10 +169,9 @@ def multiDeck(tbl_options):
 
 #--------------------------------------------------------------------
   
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: SWITCH SUMMARY TABLE
-
-    #FROM SQL QUERY WITH GROUP HEADERS ON MERGED CELLS
-    #using two db tables from two csv files
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Switch Summary'
     tbl_options.subtitle = customer
@@ -240,7 +182,6 @@ def multiDeck(tbl_options):
     SET fru_status=''
     WHERE UPPER(fru_status) = 'ENABLED' OR UPPER(fru_status) = 'OK' ''')
     conn.commit()
-
     
     #----------------------
     #This query reports the total of unique combinations of
@@ -257,11 +198,12 @@ def multiDeck(tbl_options):
         LEFT JOIN (
             SELECT sw_name, COUNT(*) AS fru_cnt
             FROM frus
-            WHERE 
-                fru_status != ''
+            WHERE fru_status != ''
+                AND date = (SELECT max(date) FROM frus)
             GROUP BY sw_name
             ) f
         ON f.sw_name = s.sw_name
+        WHERE date = (SELECT max(date) FROM switches)
     GROUP BY
         s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
     ORDER BY
@@ -282,21 +224,19 @@ def multiDeck(tbl_options):
                 'Switch Status',
                 'Faulty FRUs')]
 
-    #add the data[] elements to the headers,
-    #so that the headers are the first element 
+    #add the sql fetched data[] elements to the headers,
+    #so that the headers are the first element on the list 
     headers.extend(data)
     #rename 'headers' as 'data'
     data = headers
     create_single_table_db(data, tbl_options)
    
 # #--------------------------------------------------------------------
-# 
-#     #SLIDE: PORT ERRORS
-# 
-    tbl_options.title = 'Port Errors'
-    tbl_options.subtitle = customer
-
-     # Port Error Slide
+ 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     #SLIDE: PORT ERRORS
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
     # Shows all the ports with more than 1k errors and avPerf > 10
     
     tbl_options.title = 'Port Errors'
@@ -311,6 +251,8 @@ def multiDeck(tbl_options):
             error_count > 999
             AND
             avPerf > 10
+            AND 
+            date = (SELECT max(date) FROM PortErrorCnt)
         ORDER BY
             error_count DESC
        ''')
@@ -349,7 +291,7 @@ def multiDeck(tbl_options):
         WHERE t1.date = (SELECT max(date) FROM zones) AND  t2.date = '2017-09-12'
     ''')
     data = c.fetchall()
-    print data
+    #print data
 
 
 # Another test
@@ -372,7 +314,7 @@ def multiDeck(tbl_options):
         SELECT max(date) FROM zones
     ''')
     data = c.fetchall()
-    print data
+    #print data
 
 
 # #--------------------------------------------------------------------

@@ -131,36 +131,43 @@ while True:
                 continue
             
             #This SH Report has CSV files. 
-            #Create slide deck with current SAN / SH Report variables 
+            
+            # #Create slide deck with current SAN / SH Report variables 
             csvPath, shName, sanName, shDate, shYear = data
+            
+            #TO DO: 
             
             #add to a list all the sh names common to each report's csv files
             options.sanList.append( (shDate, shName, shFile, sanName, csvPath) )
 
-            #add the customer folder name to the report variables' tuple
+            # 
+            # #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
-            #store customer variables tuple into options
+            # #store customer variables tuple into options
             options.custData = custData
             
             #do not archive the remote report zip files for this customer
             #place this in a config file!
             options.archv_opt = 'no_remote'
+            
+        #All zipped sh reports have been collected and csv files extracted
 
-#-------------------------------------------------------
         # CHECK IF THERE ARE ANY VALID SH REPORTS (WITH CSV FILES)
         # FOR THIS CUSTOMER. IF NOT, GO TO NEXT CUSTOMER
-        # OTHERWISE, GO TO NEXT CUSTOMER.
+        # OTHERWISE, CREATE SLIDE DECKS FOR THIS CUSTOMER
 
         # ------------------------------------------
         # populate the database
         # from all the CSV files from all the SH reports in the folder
         # Remove this function from slDeck.py?
-        if options.custData == None:
+        #if options.custData == None:
+        if len(options.sanList) == 0:
             #no reports with valid csv files for this customer.
             #go to next customer.
             continue
 
         #Open the database and load one table per csv file
+        
         loadDbTables(options)
         #create Slide Deck(s) 
         createSlideDeck(options)

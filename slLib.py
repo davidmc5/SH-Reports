@@ -310,8 +310,6 @@ def colWidth(max_word_length, font_size):
     Returns the column width based on the given length of the longest word
     and the font size in Pt.
     '''
-        #Find the correction FACTOR
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         #NOTE:
         #AS THE FONT GETS SMALLER, THE CORRECTION BECOMES MORE NON-LINEAR
         #THE CORRECTION FACTOR NEEDS TO DECREASE 
@@ -322,8 +320,12 @@ def colWidth(max_word_length, font_size):
         weight = 0.57
     elif font_size > 18:
         weight = 0.60
+    elif font_size > 16:
+        weight = 0.75
     elif font_size > 15:
         weight = 0.65
+    elif font_size > 14:
+        weight = 0.80
     elif font_size > 12:
         weight = 0.65
     elif font_size > 11:
@@ -331,8 +333,6 @@ def colWidth(max_word_length, font_size):
     elif font_size > 10:
         weight = 0.70
     else: weight = 1.00
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
     
     return (Pt( font_size + font_size * max_word_length * weight ) )
 
