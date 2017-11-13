@@ -293,14 +293,14 @@ def multiDate_check(tbl_options):
     for san in tbl_options.sanList:
         #print san
         update_sanDates(san, reports)
-    print reports
+    #print reports
             
     newDate = time.strptime(san[0], "%Y-%m-%d")
         #print san[0], newDate
         
     date1= "2017-06-25"
     date2= "2017-06-26"
-    print date1 > date2, date1 < date2
+    #print date1 > date2, date1 < date2
             
 def update_sanDates(this_san, prev_sans):
     '''

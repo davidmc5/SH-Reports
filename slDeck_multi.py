@@ -51,7 +51,7 @@ def multiDeck(tbl_options):
     #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
     names = []
     for san in tbl_options.sanList:
-        print san[0]
+        #print san[0]
         #!
         # append only the max date file names.
         #!
@@ -134,6 +134,7 @@ def multiDeck(tbl_options):
     SELECT
         sw_fabric,
         active_zoneCfg,
+        zones,
         hang_alias,
         hang_zones,
         hang_configs,
@@ -148,8 +149,9 @@ def multiDeck(tbl_options):
    ''')
     data = c.fetchall()
     
-    #covert data on 'dbUsed' column from Bytes to MB
-    data = formatDbUsed(data)
+    #convert data on 'dbUsed' column from Bytes to MB
+    #and add the 'MB' units
+    data = formatDbUsed(data, column=7)
 
     #reformat dbUsed data
     
@@ -158,6 +160,7 @@ def multiDeck(tbl_options):
     # as the very first record of the 'data' list
     headers = [('Fabric',
                 'Active Zone',
+                'Total Zones',
                 'Hanging Alias Mems',
                 'Hanging Zone Mems',
                 'Hanging Config Mems',

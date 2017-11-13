@@ -133,6 +133,7 @@ def singleDeck(tbl_options):
     SELECT
         sw_fabric,
         active_zoneCfg,
+        zones,
         hang_alias,
         hang_zones,
         hang_configs,
@@ -148,7 +149,7 @@ def singleDeck(tbl_options):
     data = c.fetchall()
     
     #covert data on 'dbUsed' column from Bytes to MB
-    data = formatDbUsed(data)
+    data = formatDbUsed(data, column=7)
 
     #reformat dbUsed data
     
@@ -157,6 +158,7 @@ def singleDeck(tbl_options):
     # as the very first record of the 'data' list
     headers = [('Fabric',
                 'Active Zone',
+                'Total Zones',
                 'Hanging Alias Mems',
                 'Hanging Zone Mems',
                 'Hanging Config Mems',

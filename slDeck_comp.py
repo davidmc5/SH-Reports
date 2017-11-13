@@ -52,7 +52,7 @@ def compDeck(tbl_options):
     #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
     names = []
     for san in tbl_options.sanList:
-        print san[0]
+        #print san[0]
         #!
         # append only the max date file names.
         #!

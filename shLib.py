@@ -129,8 +129,8 @@ def archiveFiles(options):
     #Archive remote and local copies of sh zip files
 
     #retrieve SH report variables
-    customer, csvPath, shName, sanName, shYear = options.custData
-    
+    customer, csvPath, shName, sanName, shDate, shYear = options.custData
+
     #remote folder
     folder = drive + startFolder + customer + shFolder
 

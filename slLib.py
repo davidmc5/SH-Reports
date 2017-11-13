@@ -65,8 +65,19 @@ class Table_Options:
         #font.color.theme_color = MSO_THEME_COLOR.ACCENT_1
 
 #---------------------------------------------------------------
-def formatDbUsed(data):
+def formatDbUsed(data, column=None):
+    # NOTE: ONLY USE THIS FUNCTION IF THE COLUMN TO CONVERT IS THAT LAST ONE.
+    # NEED TO FIX TO CONVERT OTHER COLUMNS.
+    
     #convert the bytes value into a MB to shorten the width of the column
+    #column # start at 1!
+    if not column:
+        print '------------------------'
+        print "ERROR: Need to specify which column needs Bytes to MB conversion"
+        print 'formatDbUsed(data, column=#)'
+        print '------------------------'
+        quit()
+        
     newData = []
     #grab the dbUse value
     for item in data:
@@ -77,7 +88,14 @@ def formatDbUsed(data):
         #items = re.match('(\d+\.\d+%)\s+of\s+(\d+)B', row[5])
         #1) grab everything before the % sign
         #2) grab everything between 'of' and 'B'
-        items = re.match('(.+)%\s+of(.+)B', row[5])
+        try:            
+            items = re.match('(.+)%\s+of(.+)B', row[column-1])
+        except:
+            print '-----------------------------------------------'
+            print 'ERROR: Incorrect column or string to convert to MB'
+            print 'formatDbUsed(data, column=#)'
+            print '-----------------------------------------------'
+            quit()
         #print items.group(1)
         #print items.group(2)
 
@@ -85,7 +103,7 @@ def formatDbUsed(data):
         usage = round( float(items.group(1)), 1)
         # convert Bytes to MB
         mb = float(items.group(2))/1000000
-        lst = list(row[:5]) # save the first 4 elements
+        lst = list(row[:column-1]) # save the first elements befomre the db usage
         # add the last element(db usage) to the tuple
         #(tuples are immutable so first convert to a list 
         lst.append(str(usage) + '%' + '  of ' + str(round(mb, 1)) + ' MB')
@@ -321,11 +339,11 @@ def colWidth(max_word_length, font_size):
     elif font_size > 18:
         weight = 0.60
     elif font_size > 16:
-        weight = 0.75
+        weight = 0.65
     elif font_size > 15:
         weight = 0.65
     elif font_size > 14:
-        weight = 0.80
+        weight = 0.70
     elif font_size > 12:
         weight = 0.65
     elif font_size > 11:

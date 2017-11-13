@@ -135,8 +135,6 @@ while True:
             # #Create slide deck with current SAN / SH Report variables 
             csvPath, shName, sanName, shDate, shYear = data
             
-            #TO DO: 
-            
             #add to a list all the sh names common to each report's csv files
             options.sanList.append( (shDate, shName, shFile, sanName, csvPath) )
 
@@ -174,7 +172,7 @@ while True:
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         #To test slide design. 
         #Stop after slides creation but before deleting SH reports.
-        if slideDesign:
+        if slideDesign and siteEnv == 'LAB':
             print ''
             print '------------------------'
             print 'Stopping to check slides'
