@@ -503,20 +503,23 @@ def saveDeck(tbl_options):
     
     #but if a slide deck with the same name already exists and it is open
     #add a timestamp to the name to make it unique    
-    timestamp = datetime.datetime.now().strftime("%y-%m-%d-%H%M")
+    timestamp = datetime.datetime.now().strftime("_%H%M")
     datestamp = datetime.datetime.now().strftime("%y-%m-%d")
 
     prs = tbl_options.presentation
 
-    if sanName == 'ALL':
-        shName = customer + '_AGGREGATE_' + datestamp
+    if sanName == 'COMB':
+        shName = customer + '_COMBINED_' + datestamp
+        
+    elif sanName == 'COMP':
+        shName = customer + '_COMPARED_' + datestamp
     try:
         prs.save(folder + shName + '.pptx')
     except:
         #if slide deck with the same name is open...
         #... store a new one renamed with a timestamp 
         print folder + shName, 'Kept Open'
-        prs.save(folder + shName + '-'+ timestamp + '.pptx')
+        prs.save(folder + shName + timestamp + '.pptx')
     #save a LOCAL copy of the slide deck
     folder = archiveFolder
     try:
@@ -525,6 +528,6 @@ def saveDeck(tbl_options):
         #if slide deck with the same name is open...
         #... store a new one renamed with a timestamp 
         print folder + shName, 'Kept Open'
-        prs.save(folder + shName + '-'+ timestamp + '.pptx')
+        prs.save(folder + shName + timestamp + '.pptx')
 #-----------------------------------------------------------------
 

@@ -5,6 +5,7 @@ from sqlLib import *
 #import datetime
 from slDeck_single import singleDeck
 from slDeck_multi import multiDeck
+from slDeck_comp import compDeck
 from shLib import logEntry
 import time
 #----------------------------------------------------------------------
@@ -105,7 +106,7 @@ def loadDbTables(tbl_options):
     
 ##Import into dbtable:  FabricSummary.csv
     tbl_options.csvFile = 'FabricSummary'
-    tbl_options.csvColumns = ['a', 'b','r', 'v', 'z', 'ad', 'ag']
+    tbl_options.csvColumns = ['a', 'b','r', 'w', 'v', 'z', 'ad', 'ag']
 
     tbl_options.dbTableName = 'zones'
     tbl_options.dbColNames = '''
@@ -114,6 +115,7 @@ def loadDbTables(tbl_options):
     sw_fabric TEXT,
     principalSw TEXT,
     active_zoneCfg TEXT,
+    zones INT,
     hang_alias INT,
     hang_zones INT,
     hang_configs INT,
@@ -248,20 +250,30 @@ def createSlideDeck(tbl_options):
         #SINGLE DATE ONLY FROM THIS POINT BELOW!
         #make and save slideDeck
         singleDeck(tbl_options)
-        #print 'SAN', sanName
         logEntry('Slides Created', customer, shName)
         
     if len(tbl_options.sanList) > 1:
-        # create a deck with the agregated data from all the downloaded reports
-        #store multi SAN directive to use the customer name as the file name.
-        sanName = 'ALL'
-        
+        # create a deck with the combined data from all the downloaded reports
+        # with the most recent date.
+        #store combined san flag to use the customer name as the file name.
+        sanName = 'COMB'        
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
-        #create agregated slide deck 
+        
+        #create combined slide deck 
         multiDeck(tbl_options)
-        #print 'SAN', sanName
-        logEntry('Slides Created', customer, 'Agregate')
+        logEntry('Slides Created', customer, 'Combined')
+
+        #store compared san flag to use the customer name as the file name.
+        sanName = 'COMP'        
+        custData = (customer, csvPath, shName, sanName, shDate, shYear)
+        tbl_options.custData = custData
+        
+        #create compared deck
+        compDeck(tbl_options)
+        logEntry('Slides Created', customer, 'Compared')
+        
+        
    # END OF SLIDES
    #note: the db connection is opened by loadDbTables
     tbl_options.dbConnection.close()
