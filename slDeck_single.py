@@ -181,7 +181,12 @@ def singleDeck(tbl_options):
     c.execute('''
     UPDATE frus
     SET fru_status=''
-    WHERE UPPER(fru_status) = 'ENABLED' OR UPPER(fru_status) = 'OK' ''')
+    WHERE 
+        UPPER(fru_status) = 'ENABLED' 
+        OR UPPER(fru_status) = 'OK'
+        OR UPPER(fru_status) = 'N/A'
+        ''')
+
     conn.commit()
     
     #----------------------

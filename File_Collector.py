@@ -21,9 +21,9 @@ from slDeck import loadDbTables, createSlideDeck
 from slLib import Table_Options
 
 #--------------------------------------------
-#stop script to test slide design
+#Stop script to test slide design without archiving zip reports
+#This setting only applies to LAB environment 
 slideDesign = True
-#Uncomment next line for production
 #slideDesign = False
 #--------------------------------------------
 
