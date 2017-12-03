@@ -258,20 +258,18 @@ def createSlideDeck(tbl_options):
         #store combined san flag to use the customer name as the file name.
         sanName = 'COMB'        
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
-        tbl_options.custData = custData
-        
+        tbl_options.custData = custData       
         #create combined slide deck 
         multiDeck(tbl_options)
-        logEntry('Slides Created', customer, 'Combined')
+        #logEntry('Slides Created', customer, 'Combined')
 
         #store compared san flag to use the customer name as the file name.
         sanName = 'COMP'        
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
-        tbl_options.custData = custData
-        
+        tbl_options.custData = custData        
         #create compared deck
         compDeck(tbl_options)
-        logEntry('Slides Created', customer, 'Compared')
+        #logEntry('Slides Created', customer, 'Compared')
         
         
    # END OF SLIDES

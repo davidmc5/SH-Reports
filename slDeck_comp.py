@@ -18,6 +18,9 @@ def compDeck(tbl_options):
     #retrieve this report's variables
     customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
 #--------------------------------------------------------
+
+    slidesExist = 0
+#--------------------------------------------------------
     
     ###SLIDE COPY
     
@@ -178,6 +181,10 @@ def compDeck(tbl_options):
         p1.san
     ''')
     data = c.fetchall()
+    
+    #keep track if there are any non-blank slides in this deck
+    if len(data) > 0:
+        slidesExist +=1
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #--------------------------------------------------------------------------
@@ -231,6 +238,10 @@ def compDeck(tbl_options):
         z1.san, z1.zones
    ''')
     data = c.fetchall()
+    
+    if len(data) > 0:
+        slidesExist +=1
+
     
     #covert data on 'dbUsed' column from Bytes to MB
     #data = formatDbUsed(data)
@@ -467,6 +478,9 @@ def compDeck(tbl_options):
 
 #--------------------------------------------------------------------
     # END OF SLIDES
-    saveDeck(tbl_options)
+    
+    if slidesExist > 0:
+        saveDeck(tbl_options)
+        logEntry('Slides Created', customer, 'Compared')
 #--------------------------------------------------------------------
 #--------------------------------------------------------------------
