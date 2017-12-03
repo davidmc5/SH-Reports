@@ -199,6 +199,8 @@ while True:
         if msvcrt.getch() == 'q':
             logEntry("Stopped")
             raise SystemExit(0)
+
+    time.sleep(60)
     
 
 

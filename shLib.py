@@ -268,25 +268,22 @@ def getZipFiles(customer):
         # Wait until the number of files in the folder is not incrementing,
         # to avoid downloading an incomplete number of files,
         # or retrieving corrupt files that were not fully uploaded
-
         while True:
             #this timer needs to be higher than max time it takes
             #to upload the largest file!
-            time.sleep(10) 
+            time.sleep(30) 
             lastCount = len(os.listdir(folder))
-            #print lastCount,
-
             if lastCount != firstCount:
                 #the number of files is still incrementing
                 #Keep waiting
                 firstCount = lastCount
-                logEntry('File Upload', 'Waiting for mutiple files being uploaded')                
+                logEntry('File Upload', 'Waiting for mutiple files being uploaded')
+                continue
             else:                
                 #The number of files uploaded is stable. Retrieve them.
-                #print lastCount
                 break
 
-        #there are some files...
+        #The number of files received appears static...
         #download just the zip files (if any)
         files = os.listdir(folder)
         #print files
