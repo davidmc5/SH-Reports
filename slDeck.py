@@ -240,14 +240,13 @@ def createSlideDeck(tbl_options):
         
         #-------------------------------------------------------
         #-------------------------------------------------------
-        # determine if all files are multi-date
-        multiDate_check(tbl_options)
+        # determine if all files are multi-date        
+        #multiDate_check(tbl_options)
         
         #-------------------------------------------------------
         #-------------------------------------------------------
 
         
-        #SINGLE DATE ONLY FROM THIS POINT BELOW!
         #make and save slideDeck
         singleDeck(tbl_options)
         logEntry('Slides Created', customer, shName)

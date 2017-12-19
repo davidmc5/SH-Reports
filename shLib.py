@@ -271,7 +271,8 @@ def getZipFiles(customer):
         while True:
             #this timer needs to be higher than max time it takes
             #to upload the largest file!
-            time.sleep(30) 
+            #Increased time to 1 minute to allow uploads via multiple emails (for BOX).
+            time.sleep(60) 
             lastCount = len(os.listdir(folder))
             if lastCount != firstCount:
                 #the number of files is still incrementing

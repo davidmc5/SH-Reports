@@ -527,10 +527,10 @@ def saveDeck(tbl_options):
     prs = tbl_options.presentation
 
     if sanName == 'COMB':
-        shName = customer + '_COMBINED_' + datestamp
+        shName = customer + '_COMBINED_' + datestamp + timestamp
         
     elif sanName == 'COMP':
-        shName = customer + '_COMPARED_' + datestamp
+        shName = customer + '_COMPARED_' + datestamp + timestamp
     try:
         prs.save(folder + shName + '.pptx')
     except:
