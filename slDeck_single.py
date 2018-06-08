@@ -128,7 +128,7 @@ def singleDeck(tbl_options):
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
 
-    
+     
     c.execute('''
     SELECT
         sw_fabric,
@@ -147,7 +147,9 @@ def singleDeck(tbl_options):
         sw_fabric
    ''', (sanName,))
     data = c.fetchall()
-    
+
+
+      
     #covert data on 'dbUsed' column from Bytes to MB
     data = formatDbUsed(data, column=7)
 

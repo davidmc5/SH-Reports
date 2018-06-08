@@ -82,32 +82,60 @@ def formatDbUsed(data, column=None):
     #grab the dbUse value
     for item in data:
         row = tuple(item)
+        
         #Example: (row[6] = 11.7% of 1045274B)
         #Example: (row[6] = 11% of 1045274B)
+        #Example: (row[6] = 11%of 1045274B)
+        
         # extract 1045274B and convert to 1.0MB
-        #items = re.match('(\d+\.\d+%)\s+of\s+(\d+)B', row[5])
-        #1) grab everything before the % sign
-        #2) grab everything between 'of' and 'B'
+
+        #1) grab everything before the % sign --> (.+)%
+        #2) skip any white space between '%' and 'of' --> %(\s*)of
+        #3) grab everything between 'of' and 'B' --> (of(.+)B)
+        
         try:            
-            items = re.match('(.+)%\s+of(.+)B', row[column-1])
+            items = re.match('(.+)%\s*of(.+)B', row[column-1])
+            
+            #print row[column-1]
+            
         except:
             print '-----------------------------------------------'
             print 'ERROR: Incorrect column or string to convert to MB'
             print 'formatDbUsed(data, column=#)'
             print '-----------------------------------------------'
             quit()
+            
         #print items.group(1)
         #print items.group(2)
 
-        # get the two items in parenthesis (the usage % and the db size in B)
-        usage = round( float(items.group(1)), 1)
-        # convert Bytes to MB
-        mb = float(items.group(2))/1000000
-        lst = list(row[:column-1]) # save the first elements befomre the db usage
-        # add the last element(db usage) to the tuple
-        #(tuples are immutable so first convert to a list 
-        lst.append(str(usage) + '%' + '  of ' + str(round(mb, 1)) + ' MB')
+        #(tuples are immutable so first convert to a list
+        lst = list(row[:column-1]) # save the first data columns before the db usage
+
+
+        try:
+
+            # get the two items in parenthesis (the usage % and the db size in B)
+
+            #round the percentage to no decimals
+            usage = round( float(items.group(1)), 1)
+            
+            # convert Bytes to MB
+            mb = float(items.group(2))/1000000
+            
+                          
+            # add the last element(db usage) to the tuple
+
+            lst.append(str(usage) + '%' + ' of ' + str(round(mb, 1)) + ' MB')
+            
+            
+        except:
+            # the file has invalid or missing data in the last column
+            lst.append('Unknown')
+
+        #convert the list with all columns to a tuple
         newData.append(tuple(lst))
+                
+        
     return newData
 #---------------------------------------------------------------
 
@@ -493,6 +521,7 @@ def addHeaders(headers, data):
     if len(data) == 0:
         logEntry("No Slide Data!")
         return None
+    
     if len(headers[0]) != len(data[0]):
         print 'SLIDE ERROR!: Mismatch between number of data columns and headers (slLib/addHeaders)'
         print 'Headers:', len(headers[0]), headers[0], ', Columns:', len(data[0])
