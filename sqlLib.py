@@ -37,6 +37,12 @@ def fill_dbTable(options):
 
     #get the number of columns to import from csv file
     #nColumns = len(options.csvColumns)
+
+    #if there is no data, do not create database table
+    if len(csvData) == 0:
+        return
+
+    
     nColumns = len(csvData[0])
     #set the number of data values' placeholders (?, ?, ....?) based on the number of columns
     qmark = ','.join(['?'] * nColumns)

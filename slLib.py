@@ -233,7 +233,7 @@ def create_table(slide, data, options):
     left = options.left
     top = options.top
     rows = len(data)
-    # the first row --data[0]-- should always be the headers (see slides) 
+    # the first row --data[0]-- should always be the headeaddHeadersrs (see slides) 
     # (i.e., exact number of columns)
     #note that other rows might be group headers with only one column!
     cols = len(data[0]) 
@@ -293,7 +293,7 @@ def create_table(slide, data, options):
             #For the header column only, row == 0, 
             #break each string into space-separated words 
             #to find the longest word in the string.
-            #Powerpoint will automatically break strings in cells 
+            #Powerpoint will automatically break strings iaddHeadersn cells 
             #into mutiple lines using the spaces (if any), 
             #if the cell is not wide enough.
             if row == 0:
@@ -313,7 +313,7 @@ def create_table(slide, data, options):
                     if txtLen > maxLen[col]:
                         maxLen[col] = txtLen
                 except:
-                    #maxLen[] is an empty list on first pass (header row) 
+                    #maxLen[] is an empty list on first pass (header row) addHeaders
                     maxLen.append(txtLen)
 
     #format font size based on the number of lines

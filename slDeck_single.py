@@ -281,8 +281,12 @@ def singleDeck(tbl_options):
                 'Error Count')]
     #Add table's headers row to data
     data = addHeaders(headers, data)
+    #if data is not "none" then create the slide
     if data:
         create_single_table_db(data, tbl_options)
+    else:
+        logEntry("No Port Errors")
+            
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
