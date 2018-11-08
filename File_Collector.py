@@ -22,7 +22,7 @@ from slLib import Table_Options
 
 #--------------------------------------------
 #Stop script to test slide design without archiving zip reports
-#This setting only applies to LAB environment 
+#This setting only applies to LAB environment
 slideDesign = True
 #slideDesign = False
 #--------------------------------------------
@@ -72,7 +72,7 @@ loopCount = 0
 ##blacklist = [] #keep track of bad files that can't be moved
 
 while True:
-    
+
     # clear the keyboard buffer
     while msvcrt.kbhit():
         msvcrt.getch()
@@ -111,12 +111,12 @@ while True:
 
         #now we have all SH ZIP files in the collector folder
         #Look inside each ZIP file for another ZIP with the CSV files
-        
+
         for shFile in get_shFiles():
             #print 'shFile', shFile
-            
+
             options.custData = None
-                                    
+
             data = extract_csvFiles(shFile)
             if data == None:
                 #no csv files in this sh-zip file
@@ -129,25 +129,25 @@ while True:
                 logEntry('Bad Zip', shFile)
                 archiveBad(customer, shFile)
                 continue
-            
-            #This SH Report has CSV files. 
-            
-            # #Create slide deck with current SAN / SH Report variables 
+
+            #This SH Report has CSV files.
+
+            # #Create slide deck with current SAN / SH Report variables
             csvPath, shName, sanName, shDate, shYear = data
-            
+
             #add to a list all the sh names common to each report's csv files
             options.sanList.append( (shDate, shName, shFile, sanName, csvPath) )
 
-            # 
+            #
             # #add the customer folder name to the report variables' tuple
             custData = (customer,) + data
             # #store customer variables tuple into options
             options.custData = custData
-            
+
             #do not archive the remote report zip files for this customer
             #place this in a config file!
             options.archv_opt = 'no_remote'
-            
+
         #All zipped sh reports have been collected and csv files extracted
 
         # CHECK IF THERE ARE ANY VALID SH REPORTS (WITH CSV FILES)
@@ -164,21 +164,20 @@ while True:
             #go to next customer.
             continue
 
-        #Open the database and load one table per csv file
-        
+        #Open the database and load one table per csv file        
         loadDbTables(options)
-        #create Slide Deck(s) 
+        #create Slide Deck(s)
         createSlideDeck(options)
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        #To test slide design. 
+        #To test slide design.
         #Stop after slides creation but before deleting SH reports.
         if slideDesign and siteEnv == 'LAB':
             print ''
             print '------------------------'
             print 'Stopping to check slides'
             quit()
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
-        
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         #Archive only the local SH Zip files ('no_remote')
         #to avoid excesive storage usage.
         #archiveFiles(shFile, custData, 'no_remote')
@@ -201,13 +200,3 @@ while True:
             raise SystemExit(0)
 
     time.sleep(60)
-    
-
-
-
-
-
-
-
-
-            

@@ -29,7 +29,7 @@ def loadDbTables(tbl_options):
     #customer, csvPath, shName, sanName, shYear = tbl_options.custData
     #customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
     #!
-    #print tbl_options.custData 
+    #print tbl_options.custData
     #set desired table options
     #Is this needed? csvPathList is storing those now.
     #tbl_options.csvPath = csvPath
@@ -63,7 +63,7 @@ def loadDbTables(tbl_options):
     csv_to_db(tbl_options)
 
 #-----------------------------
-    
+
 ##Import into dbtable:  SwitchPortUsage.csv
     tbl_options.csvFile = 'SwitchPortUsage'
     tbl_options.csvColumns = ['a', 'f', 'k', 'l', 'm', 'p', 'q', 'r']
@@ -103,7 +103,7 @@ def loadDbTables(tbl_options):
     csv_to_db(tbl_options)
 
 #-----------------------------
-    
+
 ##Import into dbtable:  FabricSummary.csv
     tbl_options.csvFile = 'FabricSummary'
     tbl_options.csvColumns = ['a', 'b','r', 'w', 'v', 'z', 'ad', 'ag']
@@ -122,13 +122,13 @@ def loadDbTables(tbl_options):
     zone_dbUsed TEXT
     '''
     csv_to_db(tbl_options)
-    
+
 #-----------------------------
 
 ##Import into dbtable:  PortErrorCounters.csv
     tbl_options.csvFile = 'PortErrorCounters'
     tbl_options.csvColumns = [
-        'a', 'g', 'h', 'i', 'v', 'w', 'x', 'y', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+        'a', 'g', 'h', 'i', 'v', 'w', 'x', 'y', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
         'r', 's', 't', 'u']
 
     tbl_options.dbTableName = 'PortErrorCnt'
@@ -146,7 +146,7 @@ def loadDbTables(tbl_options):
     error_type TEXT,
     error_count INT
     '''
-    
+
     tbl_options.csvPivotCols = [
         'encInFrame',
         'crc',
@@ -167,7 +167,7 @@ def loadDbTables(tbl_options):
 ##Import into dbtable:  PortErrorChanges.csv
     tbl_options.csvFile = 'PortErrorChanges'
     tbl_options.csvColumns = [
-        'a', 'g', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+        'a', 'g', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
         'r', 's', 't', 'u']
 
     tbl_options.dbTableName = 'PortErrorChg'
@@ -190,7 +190,7 @@ def loadDbTables(tbl_options):
     chg_sigLost TEXT,
     chg_frameBusy TEXT
     '''
-    
+
     csv_to_db(tbl_options)
 #-----------------------------
 
@@ -206,13 +206,13 @@ def loadDbTables(tbl_options):
 #----------------------------------------------------------------
 
 
-    
+
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 def createSlideDeck(tbl_options):
     #This function creates a slide deck
     #from all the SAN Reports downloaded
- 
+
     #IF THERE IS NO DATA FOR A SLIDE, PRINT A NOTE ON THE SLIDE: NO DATA!
     #--------------------------------------------------------
     #SLIDE CREATION
@@ -224,8 +224,8 @@ def createSlideDeck(tbl_options):
 
     for san in tbl_options.sanList:
         #retrieve next SAN data
-        
-        #!!!! ONLY INTERESTED IN customer AND shYear FROM custData. 
+
+        #!!!! ONLY INTERESTED IN customer AND shYear FROM custData.
         customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
         shDate, shName, shFile, sanName, csvPath = san
             #shDate: 2017-07-26
@@ -233,44 +233,44 @@ def createSlideDeck(tbl_options):
             #shFile: 7-27-2017_John_Morrison_170726_1640_Maiden_Prod.zip
             #sanName: Maiden_Prod
             #csvPath: F:/Users/David/Desktop/SH-COLLECTOR/Downloads/csvTemp/John_Morrison_170726_1640_Maiden_Prod_'
-        
+
         #and store it for the slide creator function
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
-        
+
         #-------------------------------------------------------
         #-------------------------------------------------------
-        # determine if all files are multi-date        
+        # determine if all files are multi-date
         #multiDate_check(tbl_options)
-        
+
         #-------------------------------------------------------
         #-------------------------------------------------------
 
-        
+
         #make and save slideDeck
         singleDeck(tbl_options)
         logEntry('Slides Created', customer, shName)
-        
+
     if len(tbl_options.sanList) > 1:
         # create a deck with the combined data from all the downloaded reports
         # with the most recent date.
         #store combined san flag to use the customer name as the file name.
-        sanName = 'COMB'        
+        sanName = 'COMB'
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
-        tbl_options.custData = custData       
-        #create combined slide deck 
+        tbl_options.custData = custData
+        #create combined slide deck
         multiDeck(tbl_options)
         #logEntry('Slides Created', customer, 'Combined')
 
         #store compared san flag to use the customer name as the file name.
-        sanName = 'COMP'        
+        sanName = 'COMP'
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
-        tbl_options.custData = custData        
+        tbl_options.custData = custData
         #create compared deck
         compDeck(tbl_options)
         #logEntry('Slides Created', customer, 'Compared')
-        
-        
+
+
    # END OF SLIDES
    #note: the db connection is opened by loadDbTables
     tbl_options.dbConnection.close()
@@ -291,28 +291,28 @@ def multiDate_check(tbl_options):
         #print san
         update_sanDates(san, reports)
     #print reports
-            
+
     newDate = time.strptime(san[0], "%Y-%m-%d")
         #print san[0], newDate
-        
+
     date1= "2017-06-25"
     date2= "2017-06-26"
     #print date1 > date2, date1 < date2
-            
+
 def update_sanDates(this_san, prev_sans):
     '''
     Check if the given san has already been added to the dictionary
-    
-    1)If a new san, store its name (as the key) in the dictionary and 
-    set the new/previous report dates the same to the current report. 
 
-    2)If already added, update newer/older date fields. 
+    1)If a new san, store its name (as the key) in the dictionary and
+    set the new/previous report dates the same to the current report.
+
+    2)If already added, update newer/older date fields.
     We'll use just the two most recent reports and ignore the rest.
     '''
     if this_san[3] in prev_sans:
         #SAN name already exists (same report with multiple dates)
         #print this_san[3], 'Exists'
-        #store 
+        #store
         prev_sans[this_san[3]][1]= this_san[0]
         #print 'existing san', prev_sans[this_san[3]]
     else:
@@ -321,7 +321,7 @@ def update_sanDates(this_san, prev_sans):
         #print this_san[3], 'Added!'
     #print reports
 
-    
+
 #-------------------------------------------------------
 #-------------------------------------------------------
 
@@ -340,4 +340,3 @@ if __name__ == "__main__":
                 '2017')
 
     createSlideDeck(custData)
-
