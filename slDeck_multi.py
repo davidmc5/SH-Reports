@@ -19,16 +19,6 @@ def multiDeck(tbl_options):
     customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
 #--------------------------------------------------------
 
-    ###SLIDE COPY
-
-    ##copy_slide(prs, prs, 0)
-
-#--------------------------------------------------------------------
-
-    ###SLIDE MOVE
-
-    ##move_slide(prs, 0, 1)
-
 #--------------------------------------------------------------------
     #TITLE SLIDE
 
@@ -62,6 +52,131 @@ def multiDeck(tbl_options):
 
     textSlide(prs, title, subtitle, names)
 
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+# added here the two slides from the compared report to unify in a single report
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #SLIDE: PORT UTILIZATION 2
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    tbl_options.title = 'Port Summary'
+    tbl_options.subtitle = '( Change From Previous Period )'
+    tbl_options.subtitle_fontSize = Pt(20)
+
+    c.execute('''
+    SELECT
+        p1.san,
+        COUNT(p1.sw_name) AS p1count,
+        printf('%d (%+d)', SUM(p1.total_ports), SUM(p1.total_ports)- SUM(p2.total_ports)),
+        printf('%d (%+d)', SUM(p1.unused_ports), SUM(p1.unused_ports)- SUM(p2.unused_ports)),
+        printf('%d %% (%+.1f)',
+            100 * ( 1.0 * SUM(p1.total_ports) - SUM(p1.unused_ports) ) / SUM(p1.total_ports),
+            100 * ( 1.0 * SUM(p1.total_ports) - SUM(p1.unused_ports) ) / SUM(p1.total_ports)-
+            100 * ( 1.0 * SUM(p2.total_ports) - SUM(p2.unused_ports) ) / SUM(p2.total_ports)
+            )
+    FROM ports as p1
+    INNER JOIN ports as p2
+        ON p1.date > p2.date
+        AND p1.sw_name = p2.sw_name
+
+    GROUP BY
+        p1.san, p1.date
+
+    ORDER BY
+        p1.san, p1.date
+    --without the limit, the query returns one record for every combination of p1.date > p2.date
+    --LIMIT 1
+
+    ''')
+    data = c.fetchall()
+
+    #format data with group headers (remove the group = first column data)
+    #data = groupHeader(data)
+
+    #Add column headers to print on the slide table
+    # this is a tuple with the column names
+    # as the very first record of the 'data' list
+
+    if data:
+        headers = [('SAN',
+                    'Total Switches',
+                    'Total Ports',
+                    'Free Ports',
+                    'Utilization',
+                    )]
+
+        headers.extend(data)
+        data = headers
+        tbl_options.font_size = Pt(10)
+        create_single_table_db(data, tbl_options)
+        #keep track if there are any non-blank slides in this deck
+        #slidesExist +=1
+
+#--------------------------------------------------------------------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #SLIDE: ZONING SUMMARY (hanging zones)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Modified to show changes between two dates
+
+    tbl_options.title = 'Zoning Summary'
+    tbl_options.subtitle = '( Change From Previous Period )'
+    tbl_options.subtitle_fontSize = Pt(20)
+
+    c.execute('''
+    SELECT
+        z1.san,
+        z1.active_zoneCfg,
+        printf('%d (%+d)', z1.zones, z1.zones-z2.zones),
+        printf('%d (%+d)', z1.hang_zones, z1.hang_zones-z2.hang_zones)
+        --z1.zone_dbUsed
+    FROM
+        zones as z1
+
+    INNER JOIN zones as z2
+        ON z1.date > z2.date
+        AND z1.principalSw = z2.principalSw
+        AND z1.active_zoneCfg != 'N/A'
+
+    GROUP BY
+        z1.san, z1.principalSw
+    ORDER BY
+        z1.san, z1.zones
+   ''')
+    data = c.fetchall()
+
+    # if len(data) > 0:
+    #     slidesExist +=1
+
+
+    #covert data on 'dbUsed' column from Bytes to MB
+    #data = formatDbUsed(data)
+    #reformat dbUsed data
+
+    #Add column headers to print on the slide table
+    # this is a tuple with the column names
+    # as the very first record of the 'data' list
+    if data:
+        headers = [('Fabric',
+                    'Active Zone',
+                    'Zones',
+                    'Hanging Zone Members',
+                    )]
+
+        headers.extend(data)
+        data = headers
+        create_single_table_db(data, tbl_options)
+
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+
+
+
+#--------------------------------------------------------------------
 #--------------------------------------------------------------------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: FABRIC SUMMARY TABLE

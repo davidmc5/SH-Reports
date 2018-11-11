@@ -247,14 +247,15 @@ def createSlideDeck(tbl_options):
         #-------------------------------------------------------
 
 
-        #make and save single fabric slideDeck
-        singleDeck(tbl_options)
-        logEntry('Slides Created', customer, shName)
+        # Make and save single fabric slideDeck
+        #singleDeck(tbl_options)
+        #logEntry('Slides Created', customer, shName)
 
-    if len(tbl_options.sanList) > 1:
+    if len(tbl_options.sanList) > 0:
         # create a deck with the combined data from all the downloaded reports
         # with the most recent date.
-        #store combined san flag to use the customer name as the file name.
+        # Store combined san flag to use the customer name as the file name.
+        # See slDeck.py: saveDeck(tbl_options)
         sanName = 'COMB'
         custData = (customer, csvPath, shName, sanName, shDate, shYear)
         tbl_options.custData = custData
@@ -262,13 +263,14 @@ def createSlideDeck(tbl_options):
         multiDeck(tbl_options)
         #logEntry('Slides Created', customer, 'Combined')
 
-        #store compared san flag to use the customer name as the file name.
-        sanName = 'COMP'
-        custData = (customer, csvPath, shName, sanName, shDate, shYear)
-        tbl_options.custData = custData
-        #create compared deck
-        compDeck(tbl_options)
-        #logEntry('Slides Created', customer, 'Compared')
+        # # Store compared san flag to use the customer name as the file name.
+        # # See slDeck.py: saveDeck(tbl_options)
+        # sanName = 'COMP'
+        # custData = (customer, csvPath, shName, sanName, shDate, shYear)
+        # tbl_options.custData = custData
+        # #create compared deck
+        # compDeck(tbl_options)
+        # #logEntry('Slides Created', customer, 'Compared')
 
 
    # END OF SLIDES
