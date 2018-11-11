@@ -1,3 +1,6 @@
+# Note: To comment an entire line of SQL code,
+# add two dashes -- at the begining of the line
+
 from slLib import *
 #import slDeck
 from sqlLib import *
@@ -11,22 +14,22 @@ def singleDeck(tbl_options):
     #connect to database
     conn = tbl_options.dbConnection
     c = conn.cursor()
-    
+
     #!
     #retrieve this report's variables
     #customer, csvPath, shName, sanName, shYear = tbl_options.custData
     customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
     #!
 #--------------------------------------------------------
-    
+
     ###SLIDE COPY
-    
+
     ##copy_slide(prs, prs, 0)
 
 #--------------------------------------------------------------------
-    
+
     ###SLIDE MOVE
-    
+
     ##move_slide(prs, 0, 1)
 
 #--------------------------------------------------------------------
@@ -35,17 +38,17 @@ def singleDeck(tbl_options):
     #grab first (title) slide (index=0)
     slide1 = prs.slides[0]
     shapes = slide1.shapes
-    
+
     #add_textbox(left, top, width, height)
     subtxt = shapes.add_textbox(Inches(2),Inches(4), Inches(10), Inches(1))
     subtxt.text = 'SAN: ' + sanName
     subtxt.text_frame.paragraphs[0].font.size = Pt(40)
     subtxt.text_frame.paragraphs[0].font.color.rgb = RGBColor(255,255,255) # White?
-    
+
 #--------------------------------------------------------------------
-    
+
     ##SLIDE WITH JUST TEXT
-    
+
     ##title_slide_layout = prs.slide_layouts[1]
     ##slide = prs.slides.add_slide(title_slide_layout)
     ##title = slide.shapes.title
@@ -55,7 +58,7 @@ def singleDeck(tbl_options):
 #--------------------------------------------------------------------
 
 ##    #SLIDE WITH ONE TABLE - FROM SINGLE CSV FILE
-    
+
 ##    tbl_options.title = 'Fabric Summary'
 ##    tbl_options.subtitle = 'SAN: '+ sanName
 ##    tbl_options.csvFile = 'FabricSummary'
@@ -86,12 +89,13 @@ def singleDeck(tbl_options):
         printf('%.0d %', 100 * ( SUM(ports.total_ports) - SUM(ports.unused_ports) ) / SUM(ports.total_ports))
     FROM
         switches s
-
-    INNER JOIN ports 
+    INNER JOIN ports
         ON s.sw_name = ports.sw_name
+        -- Use only the max date for the fabric (san)
+        AND s.date = (SELECT MAX(date) FROM switches s WHERE s.san = ports.san)
         AND s.date = ports.date
         AND s.san = ?
-    WHERE s.date = (SELECT max(date) FROM switches)
+
     GROUP BY
         s.sw_fabric, s.sw_model
     ORDER BY
@@ -99,9 +103,10 @@ def singleDeck(tbl_options):
     ''', (sanName,))
 
     data = c.fetchall()
+    #print data
     #format data with group headers (remove the group = first column data)
     data = groupHeader(data)
-    
+
     #Add column headers to print on the slide table
     # this is a tuple with the column names
     # as the very first record of the 'data' list
@@ -128,7 +133,7 @@ def singleDeck(tbl_options):
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
 
-     
+
     c.execute('''
     SELECT
         sw_fabric,
@@ -139,9 +144,10 @@ def singleDeck(tbl_options):
         hang_configs,
         zone_dbUsed
     FROM
-        zones
+        zones z
     WHERE active_zoneCfg != 'N/A'
-        AND date = (SELECT max(date) FROM zones)
+        -- Use only the max date for the fabric (san)
+        AND date = (SELECT MAX(date) FROM switches s WHERE s.san = z.san)
         AND san = ?
      ORDER BY
         sw_fabric
@@ -149,12 +155,12 @@ def singleDeck(tbl_options):
     data = c.fetchall()
 
 
-      
+
     #covert data on 'dbUsed' column from Bytes to MB
     data = formatDbUsed(data, column=7)
 
     #reformat dbUsed data
-    
+
     #Add column headers to print on the slide table
     # this is a tuple with the column names
     # as the very first record of the 'data' list
@@ -171,28 +177,28 @@ def singleDeck(tbl_options):
     create_single_table_db(data, tbl_options)
 
 #--------------------------------------------------------------------
-  
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: SWITCH SUMMARY TABLE
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tbl_options.title = 'Switch Summary'
     tbl_options.subtitle = 'SAN: '+ sanName
-    
+
     # If FRU Status is 'enabled' or 'ok', set to blank (= OK)
     c.execute('''
     UPDATE frus
     SET fru_status=''
-    WHERE 
-        UPPER(fru_status) = 'ENABLED' 
+    WHERE
+        UPPER(fru_status) = 'ENABLED'
         OR UPPER(fru_status) = 'OK'
         OR UPPER(fru_status) = 'N/A'
         ''')
 
     conn.commit()
-    
+
     #----------------------
-    
+
     #This query reports the total of unique combinations of
     #fabric, switch model, firmware, switch status and number of defective FRUs
     c.execute('''
@@ -204,16 +210,18 @@ def singleDeck(tbl_options):
         s.sw_status,
         SUM(f.fru_cnt) as tot_fru
         FROM switches s
-        LEFT JOIN (
-            SELECT sw_name, COUNT(*) AS fru_cnt
-            FROM frus
-            WHERE fru_status != ''
-                AND date = (SELECT max(date) FROM frus)
-            GROUP BY sw_name
-            ) f
-        ON f.sw_name = s.sw_name
+    LEFT JOIN (
+        SELECT sw_name, COUNT(*) AS fru_cnt
+        FROM frus f
+        WHERE fru_status != ''
+            -- Use only the max date for the fabric (san)
+            AND date = (SELECT max(date) FROM switches s WHERE f.san = s.san)
+        GROUP BY sw_name
+        ) f
+    ON f.sw_name = s.sw_name
     WHERE s.san = ?
-        AND date = (SELECT max(date) FROM switches)
+        -- Use only the max date for the fabric (san)
+        AND date = (SELECT MAX(date) FROM switches s2 WHERE s2.san = s.san)
     GROUP BY
         s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
     ORDER BY
@@ -221,15 +229,16 @@ def singleDeck(tbl_options):
     ''', (sanName,))
 
     data = c.fetchall()
-    
+    #print data
+
     #format data with group headers (remove the group = first column data)
     data = groupHeader(data)
-    
+
     #Add column headers to print on the slide table
     # this is a single tuple with the column names
     # as the very first record of the 'data' list
     # first column for 'fabric' will be printed on a single dividing row
-    
+
     headers = [('Switch Model',
                 'Total Switches',
                 'Firmware',
@@ -237,43 +246,41 @@ def singleDeck(tbl_options):
                 'Faulty FRUs')]
 
     #add the data[] elements to the headers,
-    #so that the headers are the first element 
+    #so that the headers are the first element
     headers.extend(data)
     #rename 'headers' as 'data'
     data = headers
     create_single_table_db(data, tbl_options)
-   
+
 
 #--------------------------------------------------------------------
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      #SLIDE: PORT ERRORS
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     # Shows all the ports with more than 1k errors and avPerf > 10 MB
-    
+
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
     tbl_options.subtitle_fontSize = Pt(20)
-    
+
     c.execute('''
     SELECT sw_name, slot_port, avPerf, error_type, error_count
         FROM
-            PortErrorCnt
-        WHERE 
+            PortErrorCnt p
+        WHERE
             error_count > 999
-            AND
-            avPerf > 10
-            AND 
-            date = (SELECT max(date) FROM PortErrorCnt)
-            AND
-            san = ?
+            AND avPerf > 10
+            --NOT SURE THIS IS CORRECT -- NEED TO TEST
+            AND date = (SELECT MAX(date) FROM PortErrorCnt p2 WHERE p.san = p2.san)
+            AND san = ?
         ORDER BY
             error_count DESC
        ''', (sanName,))
-   
+
     data = c.fetchall()
-       
+
     headers = [('Switch Name',
                 'Slot / Port',
                 'Avg Perf (MB)',
@@ -286,7 +293,7 @@ def singleDeck(tbl_options):
         create_single_table_db(data, tbl_options)
     else:
         logEntry("No Port Errors")
-            
+
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

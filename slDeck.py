@@ -247,7 +247,7 @@ def createSlideDeck(tbl_options):
         #-------------------------------------------------------
 
 
-        #make and save slideDeck
+        #make and save single fabric slideDeck
         singleDeck(tbl_options)
         logEntry('Slides Created', customer, shName)
 

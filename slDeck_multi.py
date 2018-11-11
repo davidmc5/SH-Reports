@@ -14,19 +14,19 @@ def multiDeck(tbl_options):
     #connect to database
     conn = tbl_options.dbConnection
     c = conn.cursor()
-    
+
     #retrieve this report's variables
     customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
 #--------------------------------------------------------
-    
+
     ###SLIDE COPY
-    
+
     ##copy_slide(prs, prs, 0)
 
 #--------------------------------------------------------------------
-    
+
     ###SLIDE MOVE
-    
+
     ##move_slide(prs, 0, 1)
 
 #--------------------------------------------------------------------
@@ -35,18 +35,18 @@ def multiDeck(tbl_options):
     #grab first (title) slide (index=0)
     slide = prs.slides[0]
     shapes = slide.shapes
-    
+
     #add_textbox(left, top, width, height)
     subtxt = shapes.add_textbox(Inches(2),Inches(4), Inches(10), Inches(1))
     subtxt.text = customer
     subtxt.text_frame.paragraphs[0].font.size = Pt(40)
     subtxt.text_frame.paragraphs[0].font.color.rgb = RGBColor(255,255,255) # White?
-    
+
 #--------------------------------------------------------------------
-    
+
     ##SLIDE: SAN Health Combined Report
     # Slide to show the SH reports used in the agregate.
-    
+
     #place all the report file names in a list
     #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
     names = []
@@ -58,10 +58,10 @@ def multiDeck(tbl_options):
         names.append(san[1]) # shName
     count = len(names)
     title = "SAN Health Combined Report"
-    subtitle = customer + ' - Reports Included (' + str(count) + '):'  
-      
+    subtitle = customer + ' - Reports Included (' + str(count) + '):'
+
     textSlide(prs, title, subtitle, names)
-                
+
 #--------------------------------------------------------------------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: FABRIC SUMMARY TABLE
@@ -85,22 +85,23 @@ def multiDeck(tbl_options):
         printf('%.0d %', 100 * ( SUM(ports.total_ports) - SUM(ports.unused_ports) ) / SUM(ports.total_ports))
     FROM
         switches s
-    
-    INNER JOIN ports 
-        ON  s.sw_name = ports.sw_name 
+
+    INNER JOIN ports
+        ON  s.sw_name = ports.sw_name
         AND s.date = ports.date
-    WHERE s.date = (SELECT max(date) FROM switches)
+        -- Use only the max date for the fabric (san)
+        AND s.date = (SELECT MAX(date) FROM switches s WHERE s.san = ports.san)
     GROUP BY
         s.sw_fabric, s.sw_model
     ORDER BY
         s.sw_fabric, s.sw_model, count
     ''')
-        
+
     data = c.fetchall()
 
     #format data with group headers (remove the group = first column data)
     #data = groupHeader(data)
-    
+
     #Add column headers to print on the slide table
     # this is a tuple with the column names
     # as the very first record of the 'data' list
@@ -129,7 +130,7 @@ def multiDeck(tbl_options):
 
     tbl_options.title = 'Zoning Summary'
     tbl_options.subtitle = customer
-    
+
     c.execute('''
     SELECT
         sw_fabric,
@@ -140,21 +141,22 @@ def multiDeck(tbl_options):
         hang_configs,
         zone_dbUsed
     FROM
-        zones
+        zones z
     WHERE
-        active_zoneCfg != 'N/A' 
-    AND date = (SELECT max(date) FROM zones)
+        active_zoneCfg != 'N/A'
+        -- Use only the max date for the fabric (san)
+        AND date = (SELECT MAX(date) FROM switches s WHERE s.san = z.san)
     ORDER BY
         sw_fabric
    ''')
     data = c.fetchall()
-    
+
     #convert data on 'dbUsed' column from Bytes to MB
     #and add the 'MB' units
     data = formatDbUsed(data, column=7)
 
     #reformat dbUsed data
-    
+
     #Add column headers to print on the slide table
     # this is a tuple with the column names
     # as the very first record of the 'data' list
@@ -171,7 +173,7 @@ def multiDeck(tbl_options):
     create_single_table_db(data, tbl_options)
 
 #--------------------------------------------------------------------
-  
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #SLIDE: SWITCH SUMMARY TABLE
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,13 +185,13 @@ def multiDeck(tbl_options):
     c.execute('''
     UPDATE frus
     SET fru_status=''
-    WHERE 
-        UPPER(fru_status) = 'ENABLED' 
+    WHERE
+        UPPER(fru_status) = 'ENABLED'
         OR UPPER(fru_status) = 'OK'
         OR UPPER(fru_status) = 'N/A'
         ''')
     conn.commit()
-    
+
     #----------------------
     #This query reports the total of unique combinations of
     #fabric, switch model, firmware, switch status and number of defective FRUs
@@ -204,13 +206,16 @@ def multiDeck(tbl_options):
         FROM switches s
         LEFT JOIN (
             SELECT sw_name, COUNT(*) AS fru_cnt
-            FROM frus
+            FROM frus f
             WHERE fru_status != ''
-                AND date = (SELECT max(date) FROM frus)
+                -- Use only the max date for the fabric (san)
+                AND date = (SELECT max(date) FROM switches s WHERE f.san = s.san)
             GROUP BY sw_name
             ) f
         ON f.sw_name = s.sw_name
-        WHERE date = (SELECT max(date) FROM switches)
+            -- Use only the max date for the fabric (san)
+            WHERE date = (SELECT MAX(date) FROM switches s2 WHERE s2.san = s.san)
+
     GROUP BY
         s.sw_fabric, s.sw_model, s.sw_firmware, s.sw_status
     ORDER BY
@@ -219,11 +224,11 @@ def multiDeck(tbl_options):
     #--------------------------------
 
     data = c.fetchall()
-    
+
     #Add column headers to print on the slide table
     # this is a single tuple with the column names
     # as the very first record of the 'data' list
-    
+
     headers = [('Fabric',
                 'Switch Model',
                 'Total Switches',
@@ -232,20 +237,20 @@ def multiDeck(tbl_options):
                 'Faulty FRUs')]
 
     #add the sql fetched data[] elements to the headers,
-    #so that the headers are the first element on the list 
+    #so that the headers are the first element on the list
     headers.extend(data)
     #rename 'headers' as 'data'
     data = headers
     create_single_table_db(data, tbl_options)
-   
+
 # #--------------------------------------------------------------------
- 
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      #SLIDE: PORT ERRORS
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 
+
     # Shows all the ports with more than 1k errors and avPerf > 10
-    
+
     tbl_options.title = 'Port Errors'
     tbl_options.subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
     tbl_options.subtitle_fontSize = Pt(20)
@@ -253,19 +258,20 @@ def multiDeck(tbl_options):
     c.execute('''
     SELECT san, sw_name, slot_port, avPerf, error_type, error_count
         FROM
-            PortErrorCnt
-        WHERE 
+            PortErrorCnt p
+        WHERE
             error_count > 999
             AND
             avPerf > 10
-            AND 
-            date = (SELECT max(date) FROM PortErrorCnt)
+            --AND date = (SELECT max(date) FROM PortErrorCnt)
+            AND date = (SELECT MAX(date) FROM PortErrorCnt p2 WHERE p.san = p2.san)
+
         ORDER BY
             error_count DESC
        ''')
-   
+
     data = c.fetchall()
-       
+
     headers = [('SAN',
                 'Switch Name',
                 'Slot / Port',
@@ -276,6 +282,13 @@ def multiDeck(tbl_options):
     data = addHeaders(headers, data)
     if data:
         create_single_table_db(data, tbl_options)
+
+
+
+
+
+
+
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #SQL TESTS
@@ -289,7 +302,7 @@ def multiDeck(tbl_options):
     #     ON t1.principalSw = t2.principalSw
     #     WHERE t1.date = '2017-09-12' AND  t2.date = '2017-10-03'
     # ''')
-    
+
     c.execute('''
         SELECT t1.sw_fabric, t1.hang_alias-t2.hang_alias
         FROM zones t1
@@ -303,14 +316,14 @@ def multiDeck(tbl_options):
 
 # Another test
     # c.execute('''
-    #     SELECT 
+    #     SELECT
     #         (SELECT max(date) FROM zones),
     #         (
     #         SELECT date
     #         FROM zones
     #         WHERE date < mxd
     #         ORDER BY date DESC
-    #         LIMIT 1            
+    #         LIMIT 1
     #         )
     #     FROM zones
     # ''')
@@ -327,10 +340,10 @@ def multiDeck(tbl_options):
 # #--------------------------------------------------------------------
     #SQL TESTS
     #prints all instances of values if a column has any letters
-    
+
     # c.execute('''
     # WITH errors AS (
-    #     SELECT sw_name, slot_port, err_c3Discards 
+    #     SELECT sw_name, slot_port, err_c3Discards
     #     FROM PortErrorCnt
     #     WHERE CAST(err_c3Discards as decimal) > 600)
     #     SELECT * FROM errors
@@ -341,8 +354,8 @@ def multiDeck(tbl_options):
     # ''')
     # data = c.fetchall()
     # print data
-    # 
-    # 
+    #
+    #
 
 #--------------------------------------------------------------------
     # END OF SLIDES

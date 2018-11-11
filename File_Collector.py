@@ -21,7 +21,7 @@ from slDeck import loadDbTables, createSlideDeck
 from slLib import Table_Options
 
 #--------------------------------------------
-#Stop script to test slide design without archiving zip reports
+#Flag to stop script to test slide design without archiving zip reports
 #This setting only applies to LAB environment
 slideDesign = True
 #slideDesign = False
@@ -164,7 +164,7 @@ while True:
             #go to next customer.
             continue
 
-        #Open the database and load one table per csv file        
+        #Open the database and load one table per csv file
         loadDbTables(options)
         #create Slide Deck(s)
         createSlideDeck(options)
@@ -199,4 +199,7 @@ while True:
             logEntry("Stopped")
             raise SystemExit(0)
 
-    time.sleep(60)
+    if siteEnv == 'LAB':
+        time.sleep(5)
+    else:
+        time.sleep(60)

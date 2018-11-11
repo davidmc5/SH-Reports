@@ -173,12 +173,18 @@ def compDeck(tbl_options):
             100 * ( 1.0 * SUM(p2.total_ports) - SUM(p2.unused_ports) ) / SUM(p2.total_ports)
             )
     FROM ports as p1
-    INNER JOIN ports as p2 ON p1.date > p2.date AND p1.sw_name = p2.sw_name
+    INNER JOIN ports as p2
+        ON p1.date > p2.date
+        AND p1.sw_name = p2.sw_name
 
     GROUP BY
         p1.san, p1.date
+
     ORDER BY
-        p1.san
+        p1.san, p1.date
+    --without the limit, the query returns one record for every combination of p1.date > p2.date
+    LIMIT 1
+
     ''')
     data = c.fetchall()
 
@@ -247,7 +253,6 @@ def compDeck(tbl_options):
 
     #covert data on 'dbUsed' column from Bytes to MB
     #data = formatDbUsed(data)
-
     #reformat dbUsed data
 
     #Add column headers to print on the slide table
@@ -412,8 +417,13 @@ def compDeck(tbl_options):
 #         create_single_table_db(data, tbl_options)
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #SQL TESTS
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+## THIS IS FOR TESTING ONLY
     #--------------------------------------------------------
 
     # c.execute('''

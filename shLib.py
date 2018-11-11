@@ -1,5 +1,5 @@
 #Module of functions to extract data from csv files
-# and produce powerpoint slides 
+# and produce powerpoint slides
 
 # this is for this module to access the namespace of the main script.
 #but it did not work for my case (createSlideDeck)
@@ -43,10 +43,10 @@ from itertools import islice
 blank_slide_layout_index = 7
 
 
-    
+
 def logEntry(*logData):
     ''' Used to create a timestamped log entry into a csv log file'''
-    
+
     tTime = time.strftime("%X")
     tDate = time.strftime("%x")
     caller = inspect.stack()[1][1] # get the module that made this call
@@ -54,7 +54,7 @@ def logEntry(*logData):
     logFields = [tDate, tTime, caller, line]
     for arg in logData:
         logFields.append(arg)
-        
+
     #logFields.extend(logData.split(','))
     try:
         with open(csvLogFile, 'a') as logFile:
@@ -70,12 +70,12 @@ def logEntry(*logData):
             print "HELLO!!! BOTH LOG FILES ARE OPEN! UNABLE TO SAVE LOGs!"
 
     # Print Log Message also to the Command Prompt Screen
-    print tDate, tTime, 
+    print tDate, tTime,
     for field in logData:
         print field,
     print ''
 
-    
+
 
 
 def createCsvTempFolder():
@@ -86,7 +86,7 @@ def createCsvTempFolder():
             os.makedirs(csvTempFolder)
             return
         except OSError as exception:
-            #a race condition occurred. 
+            #a race condition occurred.
             if exception.errno != errno.EEXIST:
                 #a race condition might have occurred.
                 #print 'Problem trying to create folder:', csvTempFolder
@@ -118,7 +118,7 @@ def initFolders():
                 os.remove(item)
     except:
         logEntry('InitFolders - File Move Error', collectorFolder, item, 'Waiting 5 sec')
-        #wait for the OS to close files        
+        #wait for the OS to close files
         time.sleep(5)
 
 
@@ -136,7 +136,7 @@ def archiveFiles(options):
 
     #if option 'no_remote' has been included, do not archive the remote file.
     archv_opt = options.archv_opt
-    
+
     for san in options.sanList:
         shDate, shName, shFile, sanName, csvPath = san
         #print 'ARCHIVING', shFile
@@ -151,7 +151,7 @@ def archiveFiles(options):
                 if exception.errno != errno.EEXIST:
                     #print 'problem trying to create folder', folder + shYear
                     logEntry('Folder Creation Error', folder + shYear)
-                    
+
             #Move sh zip file to the archive (year) directory to avoid re-processing
             startFile = folder + shFile
             endFile = folder + shYear + '/' + shFile
@@ -177,7 +177,7 @@ def archiveFiles(options):
                 logEntry('Folder Creation Error', 'Can\'t create local archive folder', archiveFolder)
                 time.sleep(60)
                 #raise
-        #Move sh zip file to the local archive directory 
+        #Move sh zip file to the local archive directory
         src = collectorFolder + shFile
         dst = archiveFolder + shFile
         shutil.move(src, dst)
@@ -190,17 +190,17 @@ def archiveBad(customer, shFile):
     #remote folder
     #drive and startFolder are defined in shPath.py
     folder = drive + startFolder + customer + shFolder
-    
+
     #Verify it exists or create a directory to archive the remote bad SH Files
     try:
         os.makedirs(folder + 'TEMP')
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             logEntry('Can\'t Create TEMP folder in ', folder)
-        
-        
+
+
     #Move bad sh zip to SAN HEALTH/TEMP
-        try:            
+        try:
             startFile = folder + shFile
             endFile = folder + 'TEMP/' + shFile
             shutil.move(startFile, endFile)
@@ -221,24 +221,24 @@ def archiveBad(customer, shFile):
         if exception.errno != errno.EEXIST:
             #print 'Problem trying to create folder', archiveFolder
             logEntry('Can\'t Create Archive folder', archiveFolder)
-            
-        
+
+
     #Move local sh zip file to the archive
-    try:        
+    try:
         src = collectorFolder + shFile
         dst = archiveFolder + shFile
         shutil.move(src, dst)
     except:
         #print 'Problem moving local bad file to archive', src
         logEntry('Can\'t Archive Bad Zip', src)
-        
-    
+
+
 
 def getZipFiles(customer):
     #checks the given customer folder for SH ZIP files
     #returns None if no files found or
     #returns the number of files downloaded to the local collector folder
-    
+
     #Customer's SH folder
     folder = drive + startFolder + customer + shFolder
 
@@ -247,7 +247,7 @@ def getZipFiles(customer):
         #shFolder does not exist
         folder = None
         return None
-    
+
     try:
         files = os.listdir(folder)
         #listdir returns an empty list if there are no files or sub folders
@@ -272,7 +272,14 @@ def getZipFiles(customer):
             #this timer needs to be higher than max time it takes
             #to upload the largest file!
             #Increased time to 1 minute to allow uploads via multiple emails (for BOX).
-            time.sleep(60) 
+
+            if siteEnv == 'LAB':
+                time.sleep(5)
+            else:
+                time.sleep(60)
+
+            #time.sleep(60)
+
             lastCount = len(os.listdir(folder))
             if lastCount != firstCount:
                 #the number of files is still incrementing
@@ -280,7 +287,7 @@ def getZipFiles(customer):
                 firstCount = lastCount
                 logEntry('File Upload', 'Waiting for mutiple files being uploaded')
                 continue
-            else:                
+            else:
                 #The number of files uploaded is stable. Retrieve them.
                 break
 
@@ -289,34 +296,34 @@ def getZipFiles(customer):
         files = os.listdir(folder)
         #print files
         fileCount = 0 #counts how many zip files have been collected
-        
+
         for eachFile in files:
             #print eachFile
-            
+
             extension = os.path.splitext(eachFile)[1]
             if (extension == '.zip'):
 
                 #----problem here
                 createCsvTempFolder()
                 #----problem here
-                
+
                 fileCount += 1
                 #print 'fileCount', fileCount
                 src = folder + eachFile
                 dst = collectorFolder + eachFile
-                
+
                 #this is a patch to prevent downloading a file
                 #that is not yet ready, and get it corrupt.
                 #find a better way of doing this.
                 #time.sleep(1)
-                
+
                 shutil.copyfile(src, dst)
-               
+
             #print eachFile
     except:
-    
+
         #PROBLEM RETRIEVING ZIP FILES!
-        logEntry('File Error', 'Can\'t Retrieve Files From', folder)        
+        logEntry('File Error', 'Can\'t Retrieve Files From', folder)
         #Probably the file is still being uploaded by user
         #skip until the next pass
         return None
@@ -343,23 +350,23 @@ def get_csvFileItems(csvZipFile):
     #example: John_Morrison_170726_1640_Maiden_Prod_CSVReports.zip
     shName = csvZipFile[:-15]
 
-    #extract report Date, Year and and SAN Name from the csv-zip file name 
+    #extract report Date, Year and and SAN Name from the csv-zip file name
     #example: shName = 'John_Morrison_170726_1640_Maiden_Prod'
     items = re.match('.+_(\d{6})_\d{4}_(.+)', shName)
     shDate = items.group(1)
     shYear = '20' + shDate[:2] #used to create SH report archive directory
     sanName = items.group(2) #used for slides subtitles
-    
+
     # Format the report date for sqlite 'YYYY-MM-DD'
     #170726 --> 2017-11-03
     shDate = shYear + '-' + shDate[2:4] + '-' + shDate[4:]
     #print shDate
     #!
-    
+
     #get full path common to all csv files
     #(only the csv file name ending is different)
     csvPath = csvTempFolder + shName + '_'
-    
+
     #!
     #return (csvPath, shName, sanName, shYear)
     return (csvPath, shName, sanName, shDate, shYear)
@@ -369,7 +376,7 @@ def get_csvFileItems(csvZipFile):
 def get_shFiles():
     #generator to get the names of ONLY files (not direstories)...
     #...in the collector folder
-    files = ( shFile for shFile in os.listdir(collectorFolder) 
+    files = ( shFile for shFile in os.listdir(collectorFolder)
          if os.path.isfile(os.path.join(collectorFolder, shFile)) )
     return files
 
@@ -378,10 +385,10 @@ def get_shFiles():
 def get_csvFiles():
     #generator to get the names of ONLY files (not direstories)...
     #...in the csv collector folder
-    files = ( csvFile for csvFile in os.listdir(csvTempFolder) 
+    files = ( csvFile for csvFile in os.listdir(csvTempFolder)
          if os.path.isfile(os.path.join(csvTempFolder, csvFile)) )
     return files
-    
+
 
 
 def extract_csvFiles(shFile):
@@ -406,15 +413,15 @@ def extract_csvFiles(shFile):
 
                 #check each file in the SH ZIP for the CSV folder
                 for compFile in file_zip.namelist():
-                    
+
                     #determine if it is CSV ZIP file ends with the string
                     #referenced by csvZipFileName
                     if compFile.endswith(csvZipFileName):
-                        #print 'CSV ZIP:', compFile                      
+                        #print 'CSV ZIP:', compFile
                         #extract the CSV ZIP file from the SH ZIP
                         #...into the local csv collector folder
                         file_zip.extract(compFile, csvTempFolder)
-                        
+
                         #Open CSV ZIP file and extract all the .csv files
                         #...into the same folder
                         with zipfile.ZipFile(csvTempFolder + compFile, 'r') as csvZipFile:
@@ -431,7 +438,7 @@ def extract_csvFiles(shFile):
     else:
         return None
 
-    
+
 
 def col2num(col):
     num = 0
@@ -453,43 +460,43 @@ def getCsvData(options):
     shData = [] #initialise a list to store each row-list
 
     csvTarget = options.csvFile + '.csv'
-    
+
     #uncomment next to find out which csv file is the problem.
     #print 'TARGET', csvTarget
 
     for san in options.sanList:
         shDate, shName, shFile, sanName, csvPath = san
         csvFile = csvPath + csvTarget
-      
+
         with open(csvFile, 'rb') as f:
             reader = csv.reader(f)
 
             for rowIdx, shRow in enumerate(reader):
                 numDataCols = len(shRow)
                 #stop reading when we reach the end
-                if len(shRow) == 0: break 
+                if len(shRow) == 0: break
                 #don't import the header row
                 if rowIdx == 0:continue
-                                    
+
                 #append each row of data to a list
                 row=[]
                 #first put the SAN name on first column
                 #this is needed when processing multiple reports (SANs)
                 row.append(shDate)
-                row.append(sanName)  
-                              
+                row.append(sanName)
+
                 #grab only the columns requested from the csv file
                 try:
                     for col in columns:
                         row.append(shRow[col2num(col)-1]) #column index starts at 1
                 except:
-                    #csv row is missing columns 
+                    #csv row is missing columns
                     #Probably fields not applicable to that specific Device.
                     #skip this row
                     print '.',
                     continue
                 shData.append(row)
-        #transpose the specified columns into rows        
+        #transpose the specified columns into rows
     if options.csvPivotCols != None:
         #pivot_csvCols2Rows(shData, options)
         return (pivot_csvCols2Rows(shData, options))
@@ -499,13 +506,13 @@ def getCsvData(options):
 def pivot_csvCols2Rows(csvData, options):
     '''
     Converts the specified END options.csvPivotCols into rows
-    by adding a new row for each column, but removing the specified columns 
-    and adding just two new columns, at the end of the row, 
+    by adding a new row for each column, but removing the specified columns
+    and adding just two new columns, at the end of the row,
     one to store the column header and the other for the column value.
-    
+
     TO DO:
-    Use a variable (assigned by slDeck.loadDbTables) for 
-    the common group end column (row[:10]). 
+    Use a variable (assigned by slDeck.loadDbTables) for
+    the common group end column (row[:10]).
     That way this function can be used to pivot other csv files
     '''
     pivotData = []
@@ -523,16 +530,16 @@ def pivot_csvCols2Rows(csvData, options):
                 newRow.append(colVal)
                 #and save the new row
                 pivotData.append(newRow)
-            
+
     #reset options for next slide
     options.csvPivotCols = None
     return(pivotData)
 #------------------------------------------------------------
 def convert(val):
     '''
-    Removes the units k, m, g from a string representing a number 
+    Removes the units k, m, g from a string representing a number
     and returns an integer reprsenting the real quantity.
-    ''' 
+    '''
     lookup = {'k': 1000, 'm': 1000000, 'g': 1000000000}
     unit = val[-1]
     try:
@@ -555,7 +562,3 @@ if __name__ == "__main__":
         customer = 'Customer B'
         getZipFiles(customer)
         print '.',
-
-
-
-
