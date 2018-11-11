@@ -12,7 +12,7 @@ from shLib import getCsvData, logEntry
 # import slDeck_multi as slMulti
 
 #from shLib import logEntry
-import re 
+import re
 import datetime
 # import slDeck_single
 # import slDeck_multi
@@ -38,7 +38,7 @@ class Table_Options:
         self.dbConnection = None # db Connection handler: conn = sql.connect(sqlite_file)
         self.dbTableName = None #name of the db table to create
         self.dbColNames = None #Column names to use on the dbtable [(names,...)]
-        
+
         self.hBand = False #sets horizontal shade banding
         self.vBand = False #sets vertical shade banding
         self.font_size = Pt(18) #<<<--------CHANGE to just use an integer
@@ -46,7 +46,7 @@ class Table_Options:
         self.font_italic = False
         self.font_name = 'Calibri'
         self.font_color = RGBColor(12, 34, 56) # Black
-        self.text_hAlign = PP_ALIGN.CENTER #LEFT, CENTER, RIGHT --Try literal conversion ast.eval() 
+        self.text_hAlign = PP_ALIGN.CENTER #LEFT, CENTER, RIGHT --Try literal conversion ast.eval()
         self.text_vAlign = MSO_ANCHOR.MIDDLE #TOP, MIDDLE, BOTTOM -- to enter only a string options = 'right'
         self.first_row = True
         self.first_col = False
@@ -68,7 +68,7 @@ class Table_Options:
 def formatDbUsed(data, column=None):
     # NOTE: ONLY USE THIS FUNCTION IF THE COLUMN TO CONVERT IS THAT LAST ONE.
     # NEED TO FIX TO CONVERT OTHER COLUMNS.
-    
+
     #convert the bytes value into a MB to shorten the width of the column
     #column # start at 1!
     if not column:
@@ -77,34 +77,34 @@ def formatDbUsed(data, column=None):
         print 'formatDbUsed(data, column=#)'
         print '------------------------'
         quit()
-        
+
     newData = []
     #grab the dbUse value
     for item in data:
         row = tuple(item)
-        
+
         #Example: (row[6] = 11.7% of 1045274B)
         #Example: (row[6] = 11% of 1045274B)
         #Example: (row[6] = 11%of 1045274B)
-        
+
         # extract 1045274B and convert to 1.0MB
 
         #1) grab everything before the % sign --> (.+)%
         #2) skip any white space between '%' and 'of' --> %(\s*)of
         #3) grab everything between 'of' and 'B' --> (of(.+)B)
-        
-        try:            
+
+        try:
             items = re.match('(.+)%\s*of(.+)B', row[column-1])
-            
+
             #print row[column-1]
-            
+
         except:
             print '-----------------------------------------------'
             print 'ERROR: Incorrect column or string to convert to MB'
             print 'formatDbUsed(data, column=#)'
             print '-----------------------------------------------'
             quit()
-            
+
         #print items.group(1)
         #print items.group(2)
 
@@ -118,71 +118,71 @@ def formatDbUsed(data, column=None):
 
             #round the percentage to no decimals
             usage = round( float(items.group(1)), 1)
-            
+
             # convert Bytes to MB
             mb = float(items.group(2))/1000000
-            
-                          
+
+
             # add the last element(db usage) to the tuple
 
             lst.append(str(usage) + '%' + ' of ' + str(round(mb, 1)) + ' MB')
-            
-            
+
+
         except:
             # the file has invalid or missing data in the last column
             lst.append('Unknown')
 
         #convert the list with all columns to a tuple
         newData.append(tuple(lst))
-                
-        
+
+
     return newData
 #---------------------------------------------------------------
 
-def fSize(numLines, maxFsize=20):    
+def fSize(numLines, maxFsize=20):
     '''
     Returns the font size in points (an integer between 10-20)
         for the given number of lines, up to the maxFSize
     '''
-        
+
     if numLines < 12:
         font_size = 20
-        
+
     elif numLines < 13:
         font_size = 19
-        
+
     elif numLines < 14:
         font_size = 18
-        
+
     elif numLines < 15:
         font_size = 17
-        
+
     elif numLines < 16:
         font_size = 16
-        
+
     elif numLines < 19:
         font_size = 15
-        
+
     elif numLines < 20:
         font_size = 14
-        
+
     elif numLines < 22:
         font_size = 13
-         
+
     elif numLines < 24:
         font_size = 12
-        
+
     elif numLines < 26:
         font_size = 11
-        
+
     else:
         font_size = 10
-        
+
     if font_size > maxFsize:
         font_size = maxFsize
     return font_size
 
-    
+
 
 def format_table(table, options):
     def iter_cells(table):
@@ -190,7 +190,7 @@ def format_table(table, options):
             for cell in row.cells:
                 yield cell
 
-    #set given table options            
+    #set given table options
     table.horz_banding = options.hBand
     table.vert_banding = options.vBand
     table.last_col = options.last_col
@@ -200,13 +200,13 @@ def format_table(table, options):
     table.last_col = options.last_col
 
     for cell in iter_cells(table):
-        
+
         #the row height adjusts automatically to font size.
         #set margins as a table options?
         cell.margin_left = cell.margin_right = Pt(10)
         cell.margin_top = cell.margin_bottom = 0
         cell.vertical_anchor = options.text_vAlign
-        
+
         for paragraph in cell.text_frame.paragraphs:
             paragraph.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
             run = cell.text_frame.paragraphs[0]
@@ -233,10 +233,10 @@ def create_table(slide, data, options):
     left = options.left
     top = options.top
     rows = len(data)
-    # the first row --data[0]-- should always be the headeaddHeadersrs (see slides) 
+    # the first row --data[0]-- should always be the headeaddHeadersrs (see slides)
     # (i.e., exact number of columns)
     #note that other rows might be group headers with only one column!
-    cols = len(data[0]) 
+    cols = len(data[0])
 
     #create table
     shapes = slide.shapes
@@ -248,7 +248,7 @@ def create_table(slide, data, options):
     subtxt.text = subtitle
     subtxt.text_frame.paragraphs[0].font.size = options.subtitle_fontSize
 
-                                  
+
     table = shapes.add_table(rows, cols, left, top, width, height).table
 
     #input data to table's cells
@@ -262,7 +262,7 @@ def create_table(slide, data, options):
                 count += 1
             #Merge group header cells for rows with just one element
             #Check if all row cells (i.e., columns) are empty (optionally except the first)
-            if count == 1: # header row            
+            if count == 1: # header row
                 #mergeCellsHorizontally(table, row_idx, start_col_idx, end_col_idx)
                 mergeCellsHorizontally(table, row_idx, 0, cols-1)
 
@@ -275,7 +275,7 @@ def create_table(slide, data, options):
     except:
         print 'SLIDE ERROR!: Data columns exceed number of headers (slLib/create_table)'
         print 'Slide:', title, ' - Headers:', len(data[0]), data[0], 'Columns:', len(row), 'Row', row_idx+1
-        print 'Quiting' 
+        print 'Quiting'
         quit()
 
     # Manual way to set specific columns' widths
@@ -290,24 +290,24 @@ def create_table(slide, data, options):
             #divider header / single merged cell-- do not use for width calculation
             continue
         for col, value in enumerate(data[row]):
-            #For the header column only, row == 0, 
-            #break each string into space-separated words 
+            #For the header column only, row == 0,
+            #break each string into space-separated words
             #to find the longest word in the string.
-            #Powerpoint will automatically break strings iaddHeadersn cells 
-            #into mutiple lines using the spaces (if any), 
+            #Powerpoint will automatically break strings iaddHeadersn cells
+            #into mutiple lines using the spaces (if any),
             #if the cell is not wide enough.
             if row == 0:
                 value = str(value)
                 #For header row only, break the string into separate words
-                #to measure their length individually. 
+                #to measure their length individually.
                 words = value.split(' ')
             else:
                 #For the rest of rows, make the column wide enough
                 #to display the cell text on a single line
                 words = [value]
-            
+
             #find the longest word in the list
-            for word in words:                    
+            for word in words:
                 txtLen = len(str(word))
                 try:
                     if txtLen > maxLen[col]:
@@ -329,7 +329,7 @@ def create_table(slide, data, options):
     #---------------------------------
 
 
-    
+
     options.font_size = Pt(font_size)
 
 
@@ -337,13 +337,13 @@ def create_table(slide, data, options):
     #the number of columns is the len() of any row. Using just first row, data[0].
     for col in xrange(len(data[0])):
         table.columns[col].width = colWidth(maxLen[col], font_size)
-        
+
     # Manually set specific columns' widths
     #(if omited, all columns are equally sized)
     #table.columns[0].width = Inches(0)
     #table.columns[1].width = Inches(1.0)
 
-       
+
     format_table(table, options)
     #reset font size in case it was changed
     options.subtitle_fontSize = Pt(30)
@@ -358,9 +358,9 @@ def colWidth(max_word_length, font_size):
     '''
         #NOTE:
         #AS THE FONT GETS SMALLER, THE CORRECTION BECOMES MORE NON-LINEAR
-        #THE CORRECTION FACTOR NEEDS TO DECREASE 
+        #THE CORRECTION FACTOR NEEDS TO DECREASE
         #AS THE NUMBER OF SYMBOLS INCREASES
-        #otherwise, the smaller strings fit right in 
+        #otherwise, the smaller strings fit right in
         #but the longer ones have too much empty space around.
     if font_size > 19:
         weight = 0.57
@@ -379,7 +379,7 @@ def colWidth(max_word_length, font_size):
     elif font_size > 10:
         weight = 0.70
     else: weight = 1.00
-    
+
     return (Pt( font_size + font_size * max_word_length * weight ) )
 
 
@@ -391,7 +391,7 @@ def create_single_table(options):
     prs = options.presentation
     title_only_slide_layout = prs.slide_layouts[5]
     slide = prs.slides.add_slide(title_only_slide_layout)
-    
+
     #get data to populate table
     shData = getCsvData(options)
 
@@ -408,7 +408,7 @@ def create_single_table_db(shData, options):
     prs = options.presentation
     title_only_slide_layout = prs.slide_layouts[5]
     slide = prs.slides.add_slide(title_only_slide_layout)
-    
+
     #create table
     table = create_table(slide, shData, options)
 
@@ -464,68 +464,70 @@ def move_slide(presentation, old_index, new_index):
 
 def textSlide(presentation, title, subtitle, text, **opts):
     '''
-    Creates a slide with a title, a subtitle and 
-    multiple rows of text with options for text color 
+    Creates a slide with a title, a subtitle and
+    multiple rows of text with options for text color
     and textbox placement and size.
     **opts examples:
-    
+
     #text Color (R, G, B)
     txt_color = (138,43,226)
-    
+
     #text box (left, top, width, height)
-    txt_box = (1.5, 2.75, 10, 3.5) 
+    txt_box = (1.5, 2.75, 10, 3.5)
     '''
-    
+
     #default text color (138,43,226) # blueviolet
     txt_color = opts.get("txt_color", (138,43,226) )
     #textbox(left, top, width, height)
     #default txt_box = (1.5, 2.75, 10, 3.5)
     txt_box = opts.get("txt_box", (1.5, 2.75, 10, 3.5) )
-    
+
     textbox =[]
     for par in txt_box:
         textbox.append(Inches(par))
 
     prs = presentation
-    
+
     title_slide_layout = prs.slide_layouts[1]
     slide = prs.slides.add_slide(title_slide_layout)
     slide_title = slide.shapes.title
     slide_subtitle = slide.placeholders[1]
     slide_title.text = title
     slide_subtitle.text = subtitle
-    
+
     #add_textbox(left, top, width, height)
     shape = slide.shapes
-    
+
     #txtBox = shape.add_textbox(Inches(1.5),Inches(2.75), Inches(10), Inches(3.5))
     txtBox = shape.add_textbox(*textbox)
-    
-    font_size = fSize(len(text))
+
+    #font_size = fSize(len(text))
     #fSize = 17
+    font_size = opts.get("font_size", fSize(len(text)) )
+
     txtBox.text_frame.paragraphs[0].font.size = Pt(font_size)
     #txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(138,43,226) # blueviolet
     txtBox.text_frame.paragraphs[0].font.color.rgb = RGBColor(*txt_color) # blueviolet
-    #Add new-line characters (\n) between each text element        
+    #Add new-line characters (\n) between each text element
     paragraph = '\n'.join(text)
     txtBox.text = paragraph
 
 
 #--------------------------------------------------------------------
-def addHeaders(headers, data):    
+def addHeaders(headers, data):
     '''
     Add column headers to print on the slide table
-    'Headers' is a tuple with the column names added on 
+    'Headers' is a tuple with the column names added on
     the very first record of the 'data' list
     '''
     if len(data) == 0:
         logEntry("No Slide Data!")
         return None
-    
+
     if len(headers[0]) != len(data[0]):
         print 'SLIDE ERROR!: Mismatch between number of data columns and headers (slLib/addHeaders)'
         print 'Headers:', len(headers[0]), headers[0], ', Columns:', len(data[0])
-        print 'Quiting' 
+        print 'Quiting'
         quit()
 
     headers.extend(data)
@@ -547,9 +549,9 @@ def saveDeck(tbl_options):
     customer, csvPath, shName, sanName, shDate, shYear = tbl_options.custData
     folder = drive + startFolder + customer + shFolder
     #!
-    
+
     #but if a slide deck with the same name already exists and it is open
-    #add a timestamp to the name to make it unique    
+    #add a timestamp to the name to make it unique
     timestamp = datetime.datetime.now().strftime("_%H%M")
     datestamp = datetime.datetime.now().strftime("%y-%m-%d")
 
@@ -557,14 +559,14 @@ def saveDeck(tbl_options):
 
     if sanName == 'COMB':
         shName = customer + '_COMBINED_' + datestamp + timestamp
-        
+
     elif sanName == 'COMP':
         shName = customer + '_COMPARED_' + datestamp + timestamp
     try:
         prs.save(folder + shName + '.pptx')
     except:
         #if slide deck with the same name is open...
-        #... store a new one renamed with a timestamp 
+        #... store a new one renamed with a timestamp
         print folder + shName, 'Kept Open'
         prs.save(folder + shName + timestamp + '.pptx')
     #save a LOCAL copy of the slide deck
@@ -573,8 +575,7 @@ def saveDeck(tbl_options):
         prs.save(folder + shName + '.pptx')
     except:
         #if slide deck with the same name is open...
-        #... store a new one renamed with a timestamp 
+        #... store a new one renamed with a timestamp
         print folder + shName, 'Kept Open'
         prs.save(folder + shName + timestamp + '.pptx')
 #-----------------------------------------------------------------
-

@@ -33,8 +33,12 @@ def multiDeck(tbl_options):
     subtxt.text_frame.paragraphs[0].font.color.rgb = RGBColor(255,255,255) # White?
 
 #--------------------------------------------------------------------
+#--------------------------------------------------------------------
 
-    ##SLIDE: SAN Health Combined Report
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #SLIDE: SAN Health Combined Report
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # Slide to show the SH reports used in the agregate.
 
     #place all the report file names in a list
@@ -397,8 +401,22 @@ def multiDeck(tbl_options):
     data = addHeaders(headers, data)
     if data:
         create_single_table_db(data, tbl_options)
+    else:
+        #place all the report file names in a list
+        #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
+        title = "Port Errors"
+        subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
+        result = ["No errors this period!",]
 
+        textSlide(prs, title, subtitle, result, font_size = 40)
 
+    #--------------------------------------------------------
+    #--------------------------------------------------------
+    #--------------------------------------------------------
+    # END OF SLIDES
+    #--------------------------------------------------------
+    #--------------------------------------------------------
+    #--------------------------------------------------------
 
 
 
