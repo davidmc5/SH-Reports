@@ -144,6 +144,7 @@ def multiDeck(tbl_options):
     INNER JOIN zones as z2
         ON z1.date > z2.date
         AND z1.principalSw = z2.principalSw
+        AND z1.sw_fabric = z2.sw_fabric
         AND z1.active_zoneCfg != 'N/A'
 
     GROUP BY
@@ -380,9 +381,7 @@ def multiDeck(tbl_options):
             PortErrorCnt p
         WHERE
             error_count > 999
-            AND
-            avPerf > 10
-            --AND date = (SELECT max(date) FROM PortErrorCnt)
+            AND avPerf > 10
             AND date = (SELECT MAX(date) FROM PortErrorCnt p2 WHERE p.san = p2.san)
 
         ORDER BY
@@ -406,9 +405,8 @@ def multiDeck(tbl_options):
         #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
         title = "Port Errors"
         subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
-        result = ["No errors this period!",]
-
-        textSlide(prs, title, subtitle, result, font_size = 40)
+        result = ["No errors this period with given criteria!",]
+        textSlide(prs, title, subtitle, result, font_size = 30)
 
     #--------------------------------------------------------
     #--------------------------------------------------------

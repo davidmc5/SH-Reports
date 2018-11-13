@@ -248,10 +248,11 @@ def createSlideDeck(tbl_options):
 
 
         # Make and save single fabric slideDeck
-        #singleDeck(tbl_options)
-        #logEntry('Slides Created', customer, shName)
+        if len(tbl_options.sanList) == 1:
+            singleDeck(tbl_options)
+            logEntry('Slides Created', customer, shName)
 
-    if len(tbl_options.sanList) > 0:
+    if len(tbl_options.sanList) > 1:
         # create a deck with the combined data from all the downloaded reports
         # with the most recent date.
         # Store combined san flag to use the customer name as the file name.

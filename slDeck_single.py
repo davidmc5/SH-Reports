@@ -272,7 +272,6 @@ def singleDeck(tbl_options):
         WHERE
             error_count > 999
             AND avPerf > 10
-            --NOT SURE THIS IS CORRECT -- NEED TO TEST
             AND date = (SELECT MAX(date) FROM PortErrorCnt p2 WHERE p.san = p2.san)
             AND san = ?
         ORDER BY
@@ -288,11 +287,15 @@ def singleDeck(tbl_options):
                 'Error Count')]
     #Add table's headers row to data
     data = addHeaders(headers, data)
-    #if data is not "none" then create the slide
     if data:
         create_single_table_db(data, tbl_options)
     else:
-        logEntry("No Port Errors")
+        #place all the report file names in a list
+        #options.sanList =[ (shDate, shName, shFile, sanName, csvPath), (...), ]
+        title = "Port Errors"
+        subtitle = 'Showing Error Count > 1k and Avg Perf > 10MB'
+        result = ["No errors this period with given criteria!",]
+        textSlide(prs, title, subtitle, result, font_size = 30)
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
