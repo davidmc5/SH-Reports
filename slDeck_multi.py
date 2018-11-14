@@ -72,31 +72,37 @@ def multiDeck(tbl_options):
     tbl_options.subtitle = '( Change From Previous Period )'
     tbl_options.subtitle_fontSize = Pt(20)
 
+    #Calculate the change on the number of free ports between the most two recent report dates for each switch
+
     c.execute('''
     SELECT
-        p1.san,
-        COUNT(p1.sw_name) AS p1count,
-        printf('%d (%+d)', SUM(p1.total_ports), SUM(p1.total_ports)- SUM(p2.total_ports)),
-        printf('%d (%+d)', SUM(p1.unused_ports), SUM(p1.unused_ports)- SUM(p2.unused_ports)),
+        this.san,
+        COUNT(this.sw_name),
+        printf('%d (%+d)', SUM(this.total_ports), SUM(this.total_ports)- SUM(prev.total_ports)),
+        printf('%d (%+d)', SUM(this.unused_ports), SUM(this.unused_ports)- SUM(prev.unused_ports)),
         printf('%d %% (%+.1f)',
-            100 * ( 1.0 * SUM(p1.total_ports) - SUM(p1.unused_ports) ) / SUM(p1.total_ports),
-            100 * ( 1.0 * SUM(p1.total_ports) - SUM(p1.unused_ports) ) / SUM(p1.total_ports)-
-            100 * ( 1.0 * SUM(p2.total_ports) - SUM(p2.unused_ports) ) / SUM(p2.total_ports)
+            100 * ( 1.0 * SUM(this.total_ports) - SUM(this.unused_ports) ) / SUM(this.total_ports),
+            100 * ( 1.0 * SUM(this.total_ports) - SUM(this.unused_ports) ) / SUM(this.total_ports)-
+            100 * ( 1.0 * SUM(prev.total_ports) - SUM(prev.unused_ports) ) / SUM(prev.total_ports)
             )
-    FROM ports as p1
-    INNER JOIN ports as p2
-        ON p1.date > p2.date
-        AND p1.sw_name = p2.sw_name
-
+    FROM ports this
+    JOIN ports prev
+        ON this.sw_name = prev.sw_name  --same switch
+        AND this.date > prev.date       --older date
+        AND NOT EXISTS (SELECT *        --no dates in between
+            FROM ports mid
+            WHERE mid.sw_name = this.sw_name
+            AND mid.date > prev.date
+            AND mid.date < this.date)
+        AND this.date = (SELECT MAX(date) --max date for each switch
+            FROM ports p
+            WHERE p.sw_name = this.sw_name)
     GROUP BY
-        p1.san, p1.date
-
+        this.san, this.date
     ORDER BY
-        p1.san, p1.date
-    --without the limit, the query returns one record for every combination of p1.date > p2.date
-    --LIMIT 1
-
+        this.san, this.date
     ''')
+
     data = c.fetchall()
 
     #format data with group headers (remove the group = first column data)
